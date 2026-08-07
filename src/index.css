@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: #e8536b;
+}
+a:hover {
+  color: #c73f58;
+}

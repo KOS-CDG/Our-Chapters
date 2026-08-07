@@ -1,25 +1,46 @@
-# CODING AGENTS: READ THIS FIRST
+# Her & Us
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+A webtoon-style, portrait-only site presenting a relationship as chapters of a love story — cover → chapter list → chapter reader, built React + TypeScript + Vite + Tailwind + Framer Motion.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+The reader renders each chapter as a **true manhwa/webtoon strip**: full-width panels stacked with **zero gap** between them (no cards, no rotation, no side margins) — captions, speech/thought bubbles, stickers, and the like button are all overlaid directly on the panel image so nothing ever breaks the continuous vertical read.
 
-## What you should do — IMPORTANT
+## Getting started
 
-**Read the chat transcripts first.** There are 1 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+```bash
+npm install
+cp .env.example .env.local   # set VITE_CLOUDINARY_CLOUD_NAME
+npm run dev
+```
 
-**Read `project/Her & Us Reader.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+Without a Cloudinary cloud name set, images fall back to stable seeded placeholders so the app still runs end-to-end.
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+## Project structure
 
-## About the design files
+```
+src/
+  types/chapter.ts      Panel, Chapter, ChapterSummary
+  data/chapters.ts       Chapter list + the "How We Met" example chapter's panels
+  lib/cloudinary.ts      getCloudinaryUrl() / getPanelSrcSet() — every image goes through here
+  lib/tokens.ts           colors, radii, shadows, spacing, fonts
+  styles/animations.css
+  hooks/useScrollProgress.ts
+  components/             icons, LikeButton, MusicToggle, ProgressRibbon,
+                           ChapterCard, ChapterListStates, Panel, FloatingParticles
+  pages/                  CoverPage, ChapterListPage, ChapterReaderPage
+  App.tsx                 react-router-dom routes: / , /chapters , /chapters/:slug
+```
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+## Adding a real chapter
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+1. Upload photos to Cloudinary under a `her-and-us/chapter-0N/...` prefix.
+2. Add/edit an entry in `src/data/chapters.ts` — chapter metadata plus a `panels` array (`size` controls panel height/pacing, `variant` picks the caption/bubble/narration treatment, `stickers` are optional corner decorations).
+3. That's it — routing, the reader strip, and the chapter list all derive from that one file.
 
-## Bundle contents
+## Design history
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `# Her & Us Cover Page` project files (HTML prototypes, assets, components)
+This app was implemented from a Claude Design handoff bundle. The original prototypes, design-token reference, and the chat transcript where the design decisions were made are preserved for reference:
+
+- [`chats/chat1.md`](chats/chat1.md) — the design conversation
+- [`project/`](project/) — the exported `.dc.html` prototypes and the first-pass data-driven React refactor
+
+Note: the reader in this app deviates from those prototypes in one deliberate way — the original design used rotated, floating "taped-photo" cards with gaps between panels; this build renders every panel full-bleed edge-to-edge with no gaps, per a later request to match a true manhwa-reading feel.
