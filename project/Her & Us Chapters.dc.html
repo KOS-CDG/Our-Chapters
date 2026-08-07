@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body{margin:0;-webkit-font-smoothing:antialiased}
+  a{color:#E8536B}
+  a:hover{color:#c73f58}
+  @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+  @keyframes wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+</style>
+</helmet>
+<div data-screen-label="Chapters" style="min-height:100vh;width:100%;background:#FFE7F0;font-family:'Nunito',sans-serif;position:relative">
+  <div style="position:absolute;inset:0;background-image:radial-gradient(circle,#ffffff 2.5px,transparent 3px);background-size:30px 30px;opacity:.35;pointer-events:none"></div>
+
+  <header style="position:sticky;top:0;z-index:10;background:rgba(255,211,228,.92);backdrop-filter:blur(6px);padding:16px 18px 10px;display:flex;align-items:center;justify-content:space-between">
+    <a href="Her%20%26%20Us%20Cover.dc.html" style="width:38px;height:38px;border-radius:999px;background:#fff;border:2px solid #FF9FC0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(232,83,107,.18);text-decoration:none;flex:none" style-hover="transform:translateX(-2px)" style-active="transform:scale(.9)">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#E8536B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"></path></svg>
+    </a>
+    <h1 style="margin:0;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;color:#E8536B">Chapters</h1>
+    <svg viewBox="0 0 24 24" width="30" height="22" fill="#E8536B" style="animation:wiggle 4s ease-in-out infinite;flex:none"><path d="M12 12 L2 6 L2 18 Z"></path><path d="M12 12 L22 6 L22 18 Z"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+  </header>
+  <svg viewBox="0 0 200 14" preserveAspectRatio="none" style="position:relative;display:block;width:100%;height:14px;z-index:9" fill="#FFE7F0">
+    <path d="M0,0 Q10,14 20,0 Q30,14 40,0 Q50,14 60,0 Q70,14 80,0 Q90,14 100,0 Q110,14 120,0 Q130,14 140,0 Q150,14 160,0 Q170,14 180,0 Q190,14 200,0 L200,0 L0,0 Z"></path>
+  </svg>
+
+  <main style="position:relative;z-index:2;padding:8px 18px 60px;max-width:520px;margin:0 auto">
+
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:8px">
+        <sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="4">
+          <div style="display:flex;gap:14px;align-items:center;background:#fff;border-radius:24px;padding:14px;box-shadow:0 8px 20px rgba(232,83,107,.1);border:1.5px solid rgba(255,159,192,.25)">
+            <div style="width:72px;height:72px;border-radius:18px;flex:none;background:linear-gradient(90deg,#FFE7F0 25%,#FFD3E4 37%,#FFE7F0 63%);background-size:400px 100%;animation:shimmer 1.4s ease-in-out infinite"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0">
+              <div style="width:60%;height:12px;border-radius:6px;background:linear-gradient(90deg,#FFE7F0 25%,#FFD3E4 37%,#FFE7F0 63%);background-size:400px 100%;animation:shimmer 1.4s ease-in-out infinite"></div>
+              <div style="width:85%;height:16px;border-radius:6px;background:linear-gradient(90deg,#FFE7F0 25%,#FFD3E4 37%,#FFE7F0 63%);background-size:400px 100%;animation:shimmer 1.4s ease-in-out infinite"></div>
+              <div style="width:70%;height:12px;border-radius:6px;background:linear-gradient(90deg,#FFE7F0 25%,#FFD3E4 37%,#FFE7F0 63%);background-size:400px 100%;animation:shimmer 1.4s ease-in-out infinite"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:48px;text-align:center;background:#fff;border:2px dashed #FF9FC0;border-radius:28px;padding:44px 28px;box-shadow:0 8px 20px rgba(232,83,107,.1)">
+        <svg viewBox="0 0 64 40" width="88" height="55" style="margin:0 auto 14px;display:block"><path d="M16 30c-8 0-14-5.5-14-12S8 6 16 6c1.6-4 6-6 12-6s10.4 2 12 6c8 0 14 5.5 14 12s-6 12-14 12H16z" fill="#BEE7F7"></path></svg>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;color:#E8536B;margin-bottom:6px">No chapters yet</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:14px;color:#8A5D6B">check back soon!</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLoaded }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:8px">
+        <sc-for list="{{ chapters }}" as="ch" hint-placeholder-count="5">
+          <div style="position:relative;display:flex;gap:14px;align-items:center;background:#fff;border-radius:24px;padding:14px;box-shadow:0 8px 20px rgba(232,83,107,.14);border:1.5px solid rgba(255,159,192,.35);cursor:pointer;transition:transform .15s,box-shadow .15s" style-hover="transform:translateY(-3px);box-shadow:0 12px 26px rgba(232,83,107,.22)" style-active="transform:scale(.97);box-shadow:0 4px 12px rgba(232,83,107,.18)">
+            <sc-if value="{{ ch.isNew }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:-12px;right:12px;z-index:3;display:flex;align-items:center;gap:4px;background:#E8536B;color:#fff;padding:5px 10px 5px 8px;border-radius:999px;font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;letter-spacing:.5px;transform:rotate(-6deg);box-shadow:0 4px 10px rgba(232,83,107,.35)">
+                <svg viewBox="0 0 24 24" width="14" height="10" fill="#fff"><path d="M12 12 L2 6 L2 18 Z"></path><path d="M12 12 L22 6 L22 18 Z"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+                NEW
+              </div>
+            </sc-if>
+            <image-slot id="{{ ch.thumbId }}" shape="rounded" radius="18" placeholder="Cover art" style="width:72px;height:72px;flex:none"></image-slot>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+              <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#8A5D6B">Chapter {{ ch.n }}</span>
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;color:#E8536B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ch.title }}</span>
+              <span style="font-family:'Nunito',sans-serif;font-size:13px;color:#8A5D6B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ch.teaser }}</span>
+            </div>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF9FC0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;listState&quot;: {&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;loaded&quot;,&quot;tsType&quot;:&quot;'loaded'|'loading'|'empty'&quot;,&quot;options&quot;:[&quot;loaded&quot;,&quot;loading&quot;,&quot;empty&quot;],&quot;section&quot;:&quot;Behavior&quot;},
+  &quot;sortOrder&quot;: {&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;chronological&quot;,&quot;tsType&quot;:&quot;'chronological'|'recent-first'&quot;,&quot;options&quot;:[&quot;chronological&quot;,&quot;recent-first&quot;],&quot;section&quot;:&quot;Behavior&quot;}
+}">
+class Component extends DCLogic {
+  renderVals() {
+    const listState = this.props.listState ?? 'loaded';
+    const sortOrder = this.props.sortOrder ?? 'chronological';
+    const raw = [
+      { n: 1, title: 'How We Met', teaser: 'A rainy afternoon, a wrong coffee order, and no regrets.' },
+      { n: 2, title: 'The First Text', teaser: '37 drafts later, I finally hit send.' },
+      { n: 3, title: 'Our First Date', teaser: 'Neither of us admits who was more nervous.' },
+      { n: 4, title: 'Meeting the Friends', teaser: 'The unofficial background check begins.' },
+      { n: 5, title: 'Right Now', teaser: 'Still turning the page, one chapter at a time.' }
+    ];
+    const maxN = Math.max(...raw.map(c => c.n));
+    let chapters = raw.map(c => ({ ...c, thumbId: 'chapter-thumb-' + c.n, isNew: c.n === maxN }));
+    if (sortOrder === 'recent-first') chapters = chapters.slice().reverse();
+    return {
+      chapters,
+      skeletons: [0, 1, 2, 3],
+      isLoading: listState === 'loading',
+      isEmpty: listState === 'empty',
+      isLoaded: listState === 'loaded'
+    };
+  }
+}
+</script>
+</body>
+</html>

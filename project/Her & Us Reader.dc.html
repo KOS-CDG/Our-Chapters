@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body{margin:0;-webkit-font-smoothing:antialiased}
+  a{color:#E8536B}
+  a:hover{color:#c73f58}
+  @keyframes wiggle{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+  @keyframes burstOut{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1);opacity:0}}
+  @keyframes bounceHint{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.02)}}
+  @keyframes pressPulse{0%{transform:scale(1)}40%{transform:scale(.9)}70%{transform:scale(1.07)}100%{transform:scale(1)}}
+  @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+</style>
+</helmet>
+<div data-screen-label="Chapter Reader" style="min-height:100vh;width:100%;background:#FFE7F0;font-family:'Nunito',sans-serif;position:relative">
+  <div style="position:absolute;inset:0;background-image:radial-gradient(circle,#ffffff 2.5px,transparent 3px);background-size:30px 30px;opacity:.3;pointer-events:none"></div>
+
+  <header style="position:sticky;top:0;z-index:30;background:rgba(255,211,228,.92);backdrop-filter:blur(6px);padding:14px 18px;display:flex;align-items:center;gap:12px">
+    <a href="Her%20%26%20Us%20Chapters.dc.html" style="width:36px;height:36px;border-radius:999px;background:#fff;border:2px solid #FF9FC0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(232,83,107,.18);text-decoration:none;flex:none" style-hover="transform:translateX(-2px)" style-active="transform:scale(.9)">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E8536B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"></path></svg>
+    </a>
+    <div style="min-width:0">
+      <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#8A5D6B">Chapter 1</div>
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;color:#E8536B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">How We Met</div>
+    </div>
+  </header>
+
+  <div style="position:fixed;top:96px;bottom:96px;right:12px;width:10px;z-index:25;background:rgba(255,255,255,.55);border:1.5px solid rgba(255,159,192,.6);border-radius:999px;box-shadow:0 4px 10px rgba(232,83,107,.12)">
+    <div style="position:absolute;left:0;right:0;top:0;border-radius:999px;background:linear-gradient(180deg,#FF9FC0,#E8536B);height:{{ progress }}%;transition:height .1s linear"></div>
+    <div style="position:absolute;left:50%;top:{{ progress }}%;transform:translate(-50%,-50%);width:22px;height:16px;filter:drop-shadow(0 2px 4px rgba(232,83,107,.4))">
+      <svg viewBox="0 0 24 24" width="22" height="16" fill="#E8536B"><path d="M12 12 L2 6 L2 18 Z"></path><path d="M12 12 L22 6 L22 18 Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg>
+    </div>
+  </div>
+
+  <button onClick="{{ toggleMusic }}" aria-pressed="{{ musicOn }}" style="position:fixed;bottom:26px;right:16px;z-index:26;width:46px;height:46px;border-radius:999px;background:rgba(255,255,255,.85);border:2px solid #FF9FC0;display:flex;align-items:center;justify-content:center;color:#E8536B;box-shadow:0 6px 14px rgba(232,83,107,.22);cursor:pointer" style-hover="transform:translateY(-2px)" style-active="transform:scale(.9)">
+    <sc-if value="{{ musicOn }}" hint-placeholder-val="{{ false }}">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle></svg>
+    </sc-if>
+    <sc-if value="{{ musicOff }}" hint-placeholder-val="{{ true }}">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle><line x1="3" y1="3" x2="21" y2="21"></line></svg>
+    </sc-if>
+  </button>
+
+  <main style="position:relative;z-index:2;display:flex;flex-direction:column;gap:44px;padding:56px 0 20px">
+    <sc-for list="{{ panels }}" as="p" hint-placeholder-count="6">
+      <div ref="{{ p.setRef }}" style="{{ p.reveal }}position:relative;width:100%">
+
+        <sc-if value="{{ p.isFramed }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;width:82%;margin:0 auto">
+            <sc-if value="{{ p.hasSticker }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;z-index:4;{{ p.stickerCss }}">
+                <sc-if value="{{ p.isHeartSticker }}" hint-placeholder-val="{{ false }}">
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="#E8536B" style="filter:drop-shadow(0 3px 5px rgba(232,83,107,.35))"><path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2 5 5.5 5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.5 0 5 3.5 3.5 6.7C19.5 16.4 12 21 12 21z"></path></svg>
+                </sc-if>
+                <sc-if value="{{ p.isBowSticker }}" hint-placeholder-val="{{ false }}">
+                  <svg viewBox="0 0 24 24" width="30" height="22" fill="#FF9FC0" style="filter:drop-shadow(0 3px 5px rgba(232,83,107,.3))"><path d="M12 12 L2 6 L2 18 Z"></path><path d="M12 12 L22 6 L22 18 Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg>
+                </sc-if>
+              </div>
+            </sc-if>
+            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-8deg);width:52px;height:18px;background:rgba(190,231,247,.85);border-radius:2px;z-index:3;box-shadow:0 2px 4px rgba(0,0,0,.08)"></div>
+            <div style="background:#fff;border-radius:20px;padding:10px;box-shadow:0 10px 22px rgba(232,83,107,.18)">
+              <image-slot id="{{ p.img }}" shape="rounded" radius="14" placeholder="Photo" style="width:100%;height:250px"></image-slot>
+            </div>
+            <div style="text-align:center;font-family:'Nunito',sans-serif;font-style:italic;font-weight:700;font-size:13.5px;color:#5C3A46;margin:10px auto 0;max-width:92%">{{ p.caption }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ p.isFullBleed }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;width:100%">
+            <image-slot id="{{ p.img }}" shape="rect" placeholder="Photo" style="width:100%;height:460px;display:block"></image-slot>
+            <sc-if value="{{ p.narrationBottom }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:34px 26px 20px;background:linear-gradient(180deg,transparent,rgba(70,20,35,.72))">
+                <div style="font-family:'Nunito',sans-serif;font-weight:800;font-style:italic;font-size:16px;line-height:1.5;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.35)">{{ p.caption }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ p.narrationTop }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:0;right:0;top:0;padding:20px 26px 34px;background:linear-gradient(0deg,transparent,rgba(70,20,35,.72))">
+                <div style="font-family:'Nunito',sans-serif;font-weight:800;font-style:italic;font-size:16px;line-height:1.5;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.35)">{{ p.caption }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ p.isSpeech }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;width:88%;margin:0 auto">
+            <image-slot id="{{ p.img }}" shape="rounded" radius="20" placeholder="Photo" style="width:100%;height:300px;display:block;box-shadow:0 10px 22px rgba(232,83,107,.18)"></image-slot>
+            <div style="position:absolute;top:18px;left:18px;max-width:68%;background:#fff;border-radius:20px;padding:12px 16px;box-shadow:0 6px 16px rgba(0,0,0,.15);z-index:2">
+              <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;color:#5C3A46">{{ p.bubble }}</span>
+            </div>
+            <div style="position:absolute;top:70px;left:26px;width:16px;height:16px;background:#fff;transform:rotate(45deg);z-index:1;box-shadow:2px 2px 4px rgba(0,0,0,.08)"></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ p.isThought }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;width:88%;margin:0 auto">
+            <image-slot id="{{ p.img }}" shape="rounded" radius="20" placeholder="Photo" style="width:100%;height:300px;display:block;box-shadow:0 10px 22px rgba(232,83,107,.18)"></image-slot>
+            <div style="position:absolute;top:-26px;right:14px;max-width:72%;background:#fff;border-radius:26px;padding:14px 18px;box-shadow:0 6px 16px rgba(0,0,0,.15);z-index:2">
+              <span style="font-family:'Nunito',sans-serif;font-weight:800;font-style:italic;font-size:14px;color:#5C3A46">{{ p.bubble }}</span>
+            </div>
+            <div style="position:absolute;top:8px;right:60px;width:12px;height:12px;border-radius:999px;background:#fff;box-shadow:0 3px 6px rgba(0,0,0,.1);z-index:1"></div>
+            <div style="position:absolute;top:18px;right:48px;width:8px;height:8px;border-radius:999px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1);z-index:1"></div>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;justify-content:center;margin-top:12px">
+          <div style="position:relative">
+            <button onClick="{{ p.toggleLike }}" aria-pressed="{{ p.liked }}" style="width:42px;height:42px;border-radius:999px;background:#fff;border:2px solid #FF9FC0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(232,83,107,.16);{{ p.likeAnimStyle }}" style-active="transform:scale(.88)">
+              <sc-if value="{{ p.liked }}" hint-placeholder-val="{{ false }}">
+                <svg viewBox="0 0 24 24" width="19" height="19" fill="#E8536B"><path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2 5 5.5 5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.5 0 5 3.5 3.5 6.7C19.5 16.4 12 21 12 21z"></path></svg>
+              </sc-if>
+              <sc-if value="{{ p.notLiked }}" hint-placeholder-val="{{ true }}">
+                <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#E8536B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2 5 5.5 5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.5 0 5 3.5 3.5 6.7C19.5 16.4 12 21 12 21z"></path></svg>
+              </sc-if>
+            </button>
+            <sc-if value="{{ p.showBurst }}" hint-placeholder-val="{{ false }}">
+              <sc-for list="{{ p.burstParticles }}" as="b" hint-placeholder-count="6">
+                <div style="{{ b.style }};pointer-events:none">
+                  <sc-if value="{{ b.isHeart }}" hint-placeholder-val="{{ true }}">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" fill="{{ b.color }}"><path d="M12 21s-7.5-4.6-10-9.3C.5 8.5 2 5 5.5 5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.5 0 5 3.5 3.5 6.7C19.5 16.4 12 21 12 21z"></path></svg>
+                  </sc-if>
+                  <sc-if value="{{ b.isStar }}" hint-placeholder-val="{{ false }}">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" fill="{{ b.color }}"><path d="M12 2l2.7 6.6 7.1.6-5.4 4.6 1.7 6.9L12 17.3 5.9 20.7l1.7-6.9L2.2 9.2l7.1-.6L12 2z"></path></svg>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px">
+      <button onClick="{{ handleNext }}" style="{{ nextButtonStyle }}" style-hover="transform:translateY(-3px)" style-active="transform:scale(.93)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="#E8536B"><ellipse cx="12" cy="16" rx="6" ry="5"></ellipse><circle cx="5" cy="9" r="2.6"></circle><circle cx="10" cy="6" r="2.6"></circle><circle cx="15" cy="6" r="2.6"></circle><circle cx="19.5" cy="9" r="2.6"></circle></svg>
+        Next Chapter &nbsp;→
+      </button>
+      <span style="font-family:'Nunito',sans-serif;font-size:13px;color:#8A5D6B">Chapter 2 · The First Text</span>
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const BURST_BASE = [0, 60, 120, 180, 240, 300].map((deg, i) => ({
+  isHeart: i % 2 === 0,
+  isStar: i % 2 !== 0,
+  color: ['#E8536B', '#FF9FC0', '#BEE7F7'][i % 3],
+  dx: Math.round(Math.cos(deg * Math.PI / 180) * 36),
+  dy: Math.round(Math.sin(deg * Math.PI / 180) * 36),
+  delay: (i * 0.03).toFixed(2)
+}));
+
+class Component extends DCLogic {
+  state = { revealed: {}, progress: 0, musicOn: false, nextPressed: false, liked: { 0: true }, bursting: {} };
+
+  panelsData = [
+    { type: 'framed', img: 'reader-panel-1', rotation: -3, sticker: 'heart', stickerCss: 'top:-14px;right:-8px;transform:rotate(12deg)', caption: "She showed up twenty minutes late holding two coffees. Only one was for her." },
+    { type: 'fullBleed', img: 'reader-panel-2', narrationPos: 'bottom', caption: "It was the first time either of us didn't want the night to end." },
+    { type: 'speech', img: 'reader-panel-3', bubble: '"Wait... you actually kept the receipt?"' },
+    { type: 'framed', img: 'reader-panel-4', rotation: 2.5, sticker: 'bow', stickerCss: 'top:-16px;left:-10px;transform:rotate(-10deg)', caption: 'Movie night rule: he always picks. I always veto.', demoBurst: true },
+    { type: 'thought', img: 'reader-panel-5', bubble: "Please don't be weird. Please don't be weird." },
+    { type: 'fullBleed', img: 'reader-panel-6', narrationPos: 'top', caption: 'And just like that, chapter one was already my favorite.' }
+  ].map((p, i) => ({
+    ...p,
+    index: i,
+    isFramed: p.type === 'framed',
+    isFullBleed: p.type === 'fullBleed',
+    isSpeech: p.type === 'speech',
+    isThought: p.type === 'thought',
+    hasSticker: !!p.sticker,
+    isHeartSticker: p.sticker === 'heart',
+    isBowSticker: p.sticker === 'bow',
+    narrationTop: p.narrationPos === 'top',
+    narrationBottom: p.narrationPos === 'bottom'
+  }));
+
+  constructor(props) {
+    super(props);
+    this.elIndexMap = new Map();
+    this.burstTimers = {};
+    this.panelsData.forEach((p, i) => { p.setRef = (el) => this.registerPanelRef(i, el); });
+  }
+
+  registerPanelRef(i, el) {
+    if (!el || this.elIndexMap.has(el)) return;
+    this.elIndexMap.set(el, i);
+    if (!this.observer) {
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = this.elIndexMap.get(entry.target);
+            this.setState((s) => ({ revealed: { ...s.revealed, [idx]: true } }));
+            this.observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2, rootMargin: '0px 0px -60px 0px' });
+    }
+    this.observer.observe(el);
+  }
+
+  componentDidMount() {
+    this.onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? Math.min(100, Math.max(0, (window.scrollY / max) * 100)) : 0;
+      this.setState({ progress: pct });
+    };
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    this.onScroll();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.onScroll);
+    if (this.observer) this.observer.disconnect();
+    Object.values(this.burstTimers).forEach(clearTimeout);
+  }
+
+  toggleLike(i) {
+    const nowLiked = !this.state.liked[i];
+    this.setState((s) => ({ liked: { ...s.liked, [i]: nowLiked } }));
+    if (nowLiked) {
+      this.setState((s) => ({ bursting: { ...s.bursting, [i]: true } }));
+      clearTimeout(this.burstTimers[i]);
+      this.burstTimers[i] = setTimeout(() => {
+        this.setState((s) => ({ bursting: { ...s.bursting, [i]: false } }));
+      }, 700);
+    }
+  }
+
+  toggleMusic = () => this.setState((s) => ({ musicOn: !s.musicOn }));
+
+  handleNext = () => {
+    this.setState({ nextPressed: true });
+    setTimeout(() => this.setState({ nextPressed: false }), 500);
+  };
+
+  renderVals() {
+    const panels = this.panelsData.map((p) => {
+      const revealed = !!this.state.revealed[p.index];
+      const rot = p.rotation || 0;
+      const isFullBleed = p.isFullBleed;
+      const transition = isFullBleed
+        ? 'transition:opacity .9s cubic-bezier(.22,.61,.36,1),transform .9s cubic-bezier(.22,.61,.36,1);'
+        : 'transition:opacity .55s ease-out,transform .6s cubic-bezier(.34,1.56,.64,1);';
+      const offset = isFullBleed ? 36 : 22;
+      const reveal = 'opacity:' + (revealed ? 1 : 0) + ';transform:translateY(' + (revealed ? 0 : offset) + 'px) rotate(' + rot + 'deg);' + transition;
+
+      const liked = !!this.state.liked[p.index];
+      const isBursting = !!this.state.bursting[p.index];
+      const showBurst = isBursting || !!p.demoBurst;
+      const burstParticles = showBurst ? BURST_BASE.map((b) => ({
+        ...b,
+        style: 'position:absolute;left:50%;top:50%;width:14px;height:14px;--dx:' + b.dx + 'px;--dy:' + b.dy + 'px;animation:burstOut .7s ease-out ' + (isBursting ? b.delay + 's forwards' : '-0.35s paused forwards')
+      })) : [];
+
+      return {
+        ...p,
+        reveal,
+        liked,
+        notLiked: !liked,
+        showBurst,
+        burstParticles,
+        likeAnimStyle: isBursting ? 'animation:heartPop .3s ease' : '',
+        toggleLike: () => this.toggleLike(p.index)
+      };
+    });
+
+    const nextBase = "display:flex;align-items:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:19px;color:#E8536B;background:#ffffff;border:3px solid #E8536B;border-radius:999px;padding:16px 34px;cursor:pointer;transition:box-shadow .15s,transform .15s;";
+    const nextAnim = this.state.nextPressed ? 'pressPulse .5s ease' : 'bounceHint 2.8s ease-in-out infinite';
+    const nextShadow = this.state.nextPressed ? '0 2px 0 #E8536B,0 4px 10px rgba(232,83,107,.25)' : '0 5px 0 #E8536B,0 10px 22px rgba(232,83,107,.28)';
+
+    return {
+      panels,
+      progress: Math.round(this.state.progress),
+      musicOn: this.state.musicOn,
+      musicOff: !this.state.musicOn,
+      toggleMusic: this.toggleMusic,
+      handleNext: this.handleNext,
+      nextButtonStyle: nextBase + 'box-shadow:' + nextShadow + ';animation:' + nextAnim + ';'
+    };
+  }
+}
+</script>
+</body>
+</html>
