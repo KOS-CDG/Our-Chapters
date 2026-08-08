@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/animations.css";
 import { colors, fonts } from "../lib/tokens";
-import { FloatingParticles } from "../components/FloatingParticles";
 import { BowIcon, SpeakerIcon } from "../components/icons";
 import { getCloudinaryUrl } from "../lib/cloudinary";
 import { RibbonIcon } from "../components/RibbonIcon";
@@ -40,9 +39,9 @@ export function CoverPage() {
         width: "100%",
         position: "relative",
         overflowX: "hidden",
-        background: "linear-gradient(180deg, rgba(255, 231, 240, 0.7) 0%, rgba(255, 211, 228, 0.7) 55%, rgba(255, 194, 218, 0.7) 100%)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
+        background: "rgba(255, 255, 255, 0.2)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         fontFamily: fonts.body,
       }}
     >
@@ -60,19 +59,6 @@ export function CoverPage() {
           boxSizing: "border-box",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: "radial-gradient(circle, #ffffff 2.5px, transparent 3px)",
-            backgroundSize: "30px 30px",
-            opacity: 0.4,
-            pointerEvents: "none",
-          }}
-        />
-
-        <FloatingParticles density="lively" />
-
         <motion.button
           onClick={() => setSoundOn((s) => !s)}
           aria-pressed={soundOn}

@@ -59,7 +59,7 @@ export function ChapterReaderPage() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", width: "100%", background: "rgba(255, 246, 248, 0.7)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", fontFamily: fonts.body, position: "relative" }}>
+    <div style={{ minHeight: "100vh", width: "100%", background: "rgba(255, 255, 255, 0.2)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", fontFamily: fonts.body, position: "relative" }}>
       <header
         style={{
           position: "sticky",
