@@ -5,19 +5,26 @@ import { CtaButton } from "../components/ui/CtaButton";
 import { fadeUp, listContainer, useMotionPrefs } from "../lib/motion";
 import { useMonthsary, ordinal } from "../lib/monthsary";
 import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
-import { getCloudinaryUrl } from "../lib/cloudinary";
+import { CoverThumb } from "../components/CoverThumb";
 import { chapterSummaries } from "../data/chapters";
+import type { ChapterSummary } from "../types/chapter";
 
 /** One of the two chapter previews under the masthead. */
-function Plate({ publicId, label }: { publicId: string; label: string }) {
+function Plate({
+  publicId,
+  mediaType,
+  label,
+}: {
+  publicId: string;
+  mediaType?: ChapterSummary["coverMediaType"];
+  label: string;
+}) {
   return (
     <figure className="m-0 flex w-[118px] flex-col gap-2 sm:w-[132px]">
       <div className="aspect-[4/5] overflow-hidden rounded-sm border border-line bg-sunken">
-        <img
-          src={getCloudinaryUrl(publicId, { width: 320, height: 400 })}
-          alt=""
-          loading="lazy"
-          decoding="async"
+        <CoverThumb
+          publicId={publicId}
+          mediaType={mediaType}
           className="h-full w-full object-cover"
         />
       </div>
@@ -82,8 +89,16 @@ export function CoverPage() {
           </motion.div>
 
           <motion.div variants={fadeUp} className="mt-9 flex items-start justify-center gap-4">
-            <Plate publicId={first.coverImagePublicId} label={`Chapter 0${first.number}`} />
-            <Plate publicId={third.coverImagePublicId} label={`Chapter 0${third.number}`} />
+            <Plate
+              publicId={first.coverImagePublicId}
+              mediaType={first.coverMediaType}
+              label={`Chapter 0${first.number}`}
+            />
+            <Plate
+              publicId={third.coverImagePublicId}
+              mediaType={third.coverMediaType}
+              label={`Chapter 0${third.number}`}
+            />
           </motion.div>
 
           <motion.div variants={fadeUp} className="mt-10 flex flex-col items-center gap-5">

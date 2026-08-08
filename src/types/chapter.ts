@@ -25,9 +25,10 @@ export interface Panel {
   /** "photo" when omitted. Video panels autoplay muted/looped like the cover
    *  video, with the same caption/bubble overlays on top. */
   mediaType?: "photo" | "video";
-  /** Poster frame shown before a video panel plays / while it loads, and used
-   *  in place of the video entirely for reduced-motion or data-saver users.
-   *  Required for mediaType "video". */
+  /** Optional poster frame shown before a video panel plays / while it loads.
+   *  Without one, reduced-motion and data-saver users get the clip's own first
+   *  frame from a paused <video> instead — so this is a nicety, not a
+   *  requirement, and worth adding only when frame one is a poor still. */
   posterPublicId?: string;
   alt: string;
   caption?: string;
@@ -47,6 +48,9 @@ export interface Chapter {
   title: string;
   teaser: string;
   coverImagePublicId: string;
+  /** "photo" when omitted. When "video", coverImagePublicId points at a clip
+   *  and the thumbnail loops it silently — same convention as Panel.mediaType. */
+  coverMediaType?: "photo" | "video";
   publishedAt: string;
   panels: Panel[];
 }

@@ -5,9 +5,8 @@ import { Link } from "react-router-dom";
 // whileTap makes Framer add tabindex to that div, producing a second, useless
 // tab stop in front of every row.
 const MotionLink = motion(Link);
-import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
 import { useMotionPrefs } from "../lib/motion";
-import { getCloudinaryUrl } from "../lib/cloudinary";
+import { CoverThumb } from "./CoverThumb";
 import { ChevronLeftIcon } from "./icons";
 import type { ChapterSummary } from "../types/chapter";
 
@@ -28,10 +27,8 @@ export interface ChapterCardProps {
  * link, and openable in a new tab without any role/onKeyDown scaffolding.
  */
 export function ChapterCard({ chapter, isNewest = false, to }: ChapterCardProps) {
-  usePlaceholderRefresh();
   const { tap } = useMotionPrefs();
 
-  const thumbnailUrl = getCloudinaryUrl(chapter.coverImagePublicId, { width: 200, height: 250 });
   const number = String(chapter.number).padStart(2, "0");
 
   return (
@@ -41,11 +38,11 @@ export function ChapterCard({ chapter, isNewest = false, to }: ChapterCardProps)
         </span>
 
         <div className="h-[90px] w-[72px] flex-none overflow-hidden rounded-sm bg-sunken">
-          <img
-            src={thumbnailUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
+          <CoverThumb
+            publicId={chapter.coverImagePublicId}
+            mediaType={chapter.coverMediaType}
+            width={200}
+            height={250}
             className="h-full w-full object-cover transition-transform duration-slow ease-soft group-hover:scale-[1.03]"
           />
         </div>
