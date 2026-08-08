@@ -105,7 +105,7 @@ export function ChapterReaderPage() {
       <ProgressRibbon progress={progress} />
       <MusicToggle />
 
-      <main style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 0, paddingTop: 10, maxWidth: 640, margin: "0 auto", paddingLeft: 12, paddingRight: 12 }}>
+      <main style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 0, paddingTop: 0, paddingLeft: 0, paddingRight: 0, maxWidth: 680, margin: "0 auto" }}>
         {chapter.panels.map((panel, i) => (
           <Panel key={panel.id} panel={panel} index={i} />
         ))}

@@ -72,17 +72,18 @@ export function Panel({ panel, index }: PanelProps) {
           display: "block",
           lineHeight: 0,
           cursor: "pointer",
-          margin: "6px 0",
+          margin: 0,
+          padding: 0,
         }}
       >
         <div
           style={{
             position: "relative",
             width: "100%",
-            borderRadius: 16,
+            borderRadius: 0,
             overflow: "hidden",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
-            border: "1.5px solid rgba(255, 211, 228, 0.6)",
+            border: "none",
+            boxShadow: "none",
           }}
         >
           <img
@@ -90,7 +91,7 @@ export function Panel({ panel, index }: PanelProps) {
             srcSet={srcSet}
             sizes="100vw"
             alt={panel.alt}
-            style={{ width: "100%", height, display: "block", objectFit: "cover" }}
+            style={{ width: "100%", height, display: "block", objectFit: "cover", margin: 0, padding: 0, border: "none" }}
           />
 
           <Stickers stickers={panel.stickers} />
