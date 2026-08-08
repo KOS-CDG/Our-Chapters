@@ -1,22 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/animations.css";
 import { colors, fonts } from "../lib/tokens";
 import { FloatingParticles } from "../components/FloatingParticles";
 import { BowIcon, SpeakerIcon } from "../components/icons";
+import { getCloudinaryUrl } from "../lib/cloudinary";
 
-/** Cover / title page — also the source of truth for the site's palette, type, and decorative motifs (see src/lib/tokens.ts). */
 export function CoverPage() {
   const navigate = useNavigate();
   const [soundOn, setSoundOn] = useState(false);
   const [pressed, setPressed] = useState(false);
+  const [, setRerender] = useState(0);
+
+  useEffect(() => {
+    const handleUpdate = () => setRerender((r) => r + 1);
+    window.addEventListener("placeholder_mode_change", handleUpdate);
+    window.addEventListener("custom_photo_change", handleUpdate);
+    return () => {
+      window.removeEventListener("placeholder_mode_change", handleUpdate);
+      window.removeEventListener("custom_photo_change", handleUpdate);
+    };
+  }, []);
 
   const handleStart = () => {
     setPressed(true);
     setTimeout(() => setPressed(false), 500);
     navigate("/chapters");
   };
+
+  const sampleCover1 = getCloudinaryUrl("her-and-us/chapter-01/cover", { width: 300, height: 360 });
+  const sampleCover2 = getCloudinaryUrl("her-and-us/chapter-03/cover", { width: 300, height: 360 });
 
   return (
     <div
@@ -37,8 +51,8 @@ export function CoverPage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 36,
-          padding: "76px 24px 40px",
+          gap: 28,
+          padding: "60px 24px 40px",
           textAlign: "center",
           boxSizing: "border-box",
         }}
@@ -81,45 +95,48 @@ export function CoverPage() {
           <SpeakerIcon muted={!soundOn} />
         </motion.button>
 
-        <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+        {/* Hero Branding */}
+        <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <span
             style={{
               background: colors.babyBlue200,
               color: colors.inkPlum,
-              padding: "6px 16px",
+              padding: "6px 18px",
               borderRadius: 999,
               fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "1.2px",
+              fontWeight: 800,
+              letterSpacing: "1.4px",
               textTransform: "uppercase",
               fontFamily: fonts.body,
+              boxShadow: "0 4px 12px rgba(190,231,247,0.5)",
             }}
           >
-            A Love Webtoon
+            ✦ A Love Webtoon ✦
           </span>
           <div style={{ animation: "wiggle 4s ease-in-out infinite", marginTop: 4 }}>
-            <BowIcon size={48} color={colors.cherry500} />
+            <BowIcon size={52} color={colors.cherry500} />
           </div>
           <h1
             style={{
               margin: "4px 0 0",
               fontFamily: fonts.display,
               fontWeight: 800,
-              fontSize: "clamp(34px, 10vw, 58px)",
-              lineHeight: 1.15,
+              fontSize: "clamp(38px, 11vw, 64px)",
+              lineHeight: 1.1,
               color: colors.cherry500,
-              WebkitTextStroke: "5px #fff",
+              WebkitTextStroke: "6px #fff",
               paintOrder: "stroke fill",
-              textShadow: "0 8px 0 rgba(232,83,107,.15)",
+              textShadow: "0 8px 0 rgba(232,83,107,.18)",
               textAlign: "center",
               maxWidth: "92%",
             }}
           >
             Our Chapter
           </h1>
-          <p style={{ margin: "6px 0 0", fontFamily: fonts.body, fontWeight: 700, fontSize: 15, color: colors.inkPlum, maxWidth: "90%" }}>
+          <p style={{ margin: "6px 0 0", fontFamily: fonts.body, fontWeight: 800, fontSize: 16, color: colors.inkPlum, maxWidth: "90%" }}>
             Started December 9, 2023
           </p>
+
           <span
             style={{
               display: "inline-block",
@@ -127,20 +144,80 @@ export function CoverPage() {
               background: "#fff",
               border: `2px dashed ${colors.babyBlue200}`,
               borderRadius: 12,
-              padding: "5px 12px",
+              padding: "6px 14px",
               fontFamily: fonts.body,
-              fontWeight: 700,
+              fontWeight: 800,
               fontSize: 12,
-              letterSpacing: ".5px",
+              letterSpacing: ".8px",
               color: colors.cherry500,
-              transform: "rotate(-6deg)",
-              boxShadow: "0 4px 10px rgba(232,83,107,.15)",
+              transform: "rotate(-5deg)",
+              boxShadow: "0 4px 12px rgba(232,83,107,.15)",
             }}
           >
             SINCE 12 . 09 . 2023
           </span>
         </div>
 
+        {/* Floating Polaroid Image Frame Showcase */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 16,
+            margin: "8px 0",
+          }}
+        >
+          <motion.div
+            animate={{ y: [-4, 4, -4], rotate: [-6, -4, -6] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              width: 130,
+              height: 155,
+              background: "#fff",
+              borderRadius: 16,
+              padding: "10px 10px 24px",
+              boxShadow: "0 10px 25px rgba(232,83,107,0.22)",
+              border: `2px solid ${colors.pink300}`,
+            }}
+          >
+            <img
+              src={sampleCover1}
+              alt="Chapter 1 Preview"
+              style={{ width: "100%", height: 110, borderRadius: 10, objectFit: "cover" }}
+            />
+            <div style={{ fontFamily: fonts.body, fontSize: 10, fontWeight: 800, color: colors.cherry500, marginTop: 4 }}>
+              Chapter 1 Frame
+            </div>
+          </motion.div>
+
+          <motion.div
+            animate={{ y: [4, -4, 4], rotate: [5, 7, 5] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              width: 130,
+              height: 155,
+              background: "#fff",
+              borderRadius: 16,
+              padding: "10px 10px 24px",
+              boxShadow: "0 10px 25px rgba(232,83,107,0.22)",
+              border: `2px solid ${colors.pink300}`,
+            }}
+          >
+            <img
+              src={sampleCover2}
+              alt="Chapter 3 Preview"
+              style={{ width: "100%", height: 110, borderRadius: 10, objectFit: "cover" }}
+            />
+            <div style={{ fontFamily: fonts.body, fontSize: 10, fontWeight: 800, color: colors.cherry500, marginTop: 4 }}>
+              Chapter 3 Frame
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Start Button */}
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
           <motion.button
             onClick={handleStart}
@@ -149,20 +226,22 @@ export function CoverPage() {
             whileTap={{ scale: 0.93 }}
             style={{
               fontFamily: fonts.display,
-              fontWeight: 700,
-              fontSize: 20,
+              fontWeight: 800,
+              fontSize: 21,
               color: colors.cherry500,
               background: "#ffffff",
               border: `3px solid ${colors.cherry500}`,
               borderRadius: 999,
-              padding: "16px 42px",
+              padding: "16px 44px",
               cursor: "pointer",
               boxShadow: pressed ? "0 2px 0 #E8536B, 0 4px 10px rgba(232,83,107,.25)" : "0 5px 0 #E8536B, 0 10px 22px rgba(232,83,107,.28)",
             }}
           >
             Start Reading&nbsp;→
           </motion.button>
-          <span style={{ fontFamily: fonts.body, fontSize: 13, color: colors.plumLight }}>no spoilers, we promise</span>
+          <span style={{ fontFamily: fonts.body, fontSize: 13, fontWeight: 700, color: colors.plumLight }}>
+            5 Chapters • White Frame Preview Ready
+          </span>
         </div>
 
         <svg viewBox="0 0 200 20" preserveAspectRatio="none" style={{ position: "relative", display: "block", width: "100%", height: 28, marginTop: 8 }} fill="#ffffff">
@@ -172,3 +251,4 @@ export function CoverPage() {
     </div>
   );
 }
+
