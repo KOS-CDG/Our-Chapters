@@ -39,9 +39,7 @@ export function CoverPage() {
         width: "100%",
         position: "relative",
         overflowX: "hidden",
-        background: "rgba(255, 255, 255, 0.2)",
-        backdropFilter: "blur(6px)",
-        WebkitBackdropFilter: "blur(6px)",
+        background: "transparent",
         fontFamily: fonts.body,
       }}
     >
