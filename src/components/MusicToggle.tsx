@@ -31,6 +31,7 @@ export function MusicToggle({ defaultOn = false, onChange }: MusicToggleProps) {
         borderRadius: 999,
         background: "rgba(255,255,255,.85)",
         border: `2px solid ${colors.pink300}`,
+        color: colors.cherry500,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

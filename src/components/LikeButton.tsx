@@ -50,6 +50,7 @@ export function LikeButton({ defaultLiked = false, onChange, overlay = false }: 
           borderRadius: 999,
           background: overlay ? "rgba(255,255,255,.88)" : colors.white,
           border: `2px solid ${colors.pink300}`,
+          color: colors.cherry500,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

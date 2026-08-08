@@ -59,6 +59,7 @@ export function ChapterListPage({ chapters = chapterSummaries, isLoading = false
             borderRadius: 999,
             background: "#fff",
             border: `2px solid ${colors.pink300}`,
+            color: colors.cherry500,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
