@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { colors, fonts } from "../lib/tokens";
 import { useMotionPrefs } from "../lib/motion";
 import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
 import { getCloudinaryUrl, getPanelSrcSet } from "../lib/cloudinary";
-import { StickerIcon, dropShadowStyle } from "./icons";
+import { StickerIcon } from "./icons";
 import { LikeButton } from "./LikeButton";
 import { FrameInspectorModal } from "./FrameInspectorModal";
 import type { Panel as PanelData } from "../types/chapter";
@@ -24,19 +23,20 @@ const HEIGHT_BY_SIZE: Record<PanelData["size"], string> = {
 function Stickers({ stickers }: { stickers?: PanelData["stickers"] }) {
   if (!stickers?.length) return null;
   return (
-    <>
+    <div aria-hidden="true">
       {stickers.map((s, i) => (
-        <div key={i} style={{ position: "absolute", top: s.top, left: s.left, zIndex: 4, ...dropShadowStyle }}>
-          <StickerIcon type={s.type} size={30} />
+        <div key={i} style={{ position: "absolute", top: s.top, left: s.left, zIndex: 4 }}>
+          <StickerIcon type={s.type} size={22} />
         </div>
       ))}
-    </>
+    </div>
   );
 }
 
 export interface PanelProps {
   panel: PanelData;
-  /** Position within the chapter — used only to alternate narration top/bottom for rhythm. */
+  /** Position within the chapter — used to alternate narration top/bottom for
+   *  rhythm, and to load the first panel eagerly. */
   index: number;
 }
 
@@ -44,10 +44,6 @@ export function Panel({ panel, index }: PanelProps) {
   const { reveal } = useMotionPrefs();
   const [inspecting, setInspecting] = useState(false);
   usePlaceholderRefresh();
-
-  const handleClick = () => {
-    if (DEV_TOOLS_ENABLED) setInspecting(true);
-  };
 
   const height = HEIGHT_BY_SIZE[panel.size];
   const isFullBleed = panel.size === "full";
@@ -57,101 +53,106 @@ export function Panel({ panel, index }: PanelProps) {
 
   return (
     <>
-      <motion.div
+      <motion.figure
         {...reveal(isFullBleed ? 36 : 22)}
-        onClick={handleClick}
-        whileTap={DEV_TOOLS_ENABLED ? { scale: 0.99 } : undefined}
-        style={{
-          position: "relative",
-          width: "100%",
-          display: "block",
-          lineHeight: 0,
-          cursor: DEV_TOOLS_ENABLED ? "pointer" : "default",
-          margin: 0,
-          padding: 0,
-        }}
+        className="relative m-0 block w-full p-0 leading-[0]"
       >
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            borderRadius: 0,
-            overflow: "hidden",
-            border: "none",
-            boxShadow: "none",
-          }}
-        >
+        <div className="relative w-full overflow-hidden">
           <img
             src={imageUrl}
             srcSet={srcSet}
             sizes="100vw"
             alt={panel.alt}
-            style={{ width: "100%", height, display: "block", objectFit: "cover", margin: 0, padding: 0, border: "none" }}
+            loading={index === 0 ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={index === 0 ? "high" : undefined}
+            className="m-0 block w-full border-none object-cover p-0"
+            style={{ height }}
           />
 
-          {/* Text overlays — always visible, this is the story */}
-          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 10 }}>
+          {/* The story text. pointer-events:none so it never blocks the image,
+              but never aria-hidden — this is the writing, not decoration. */}
+          <div className="pointer-events-none absolute inset-0 z-10">
             <Stickers stickers={panel.stickers} />
 
             {panel.variant === "narration" && panel.caption && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      right: 0,
-                      [narrationAtBottom ? "bottom" : "top"]: 0,
-                      padding: narrationAtBottom ? "34px 26px 22px" : "22px 26px 34px",
-                      background: narrationAtBottom
-                        ? "linear-gradient(180deg, transparent, rgba(70,20,35,.85))"
-                        : "linear-gradient(0deg, transparent, rgba(70,20,35,.85))",
-                    }}
-                  >
-                    <div style={{ fontFamily: fonts.body, fontWeight: 800, fontStyle: "italic", fontSize: 16, lineHeight: 1.5, color: "#fff", textShadow: "0 2px 6px rgba(0,0,0,.35)" }}>
-                      {panel.caption}
-                    </div>
-                  </div>
-                )}
+              <figcaption
+                className={[
+                  "absolute inset-x-0 px-7 font-display text-step1 font-normal italic",
+                  "leading-relaxed text-white",
+                  narrationAtBottom
+                    ? "bottom-0 bg-gradient-to-b from-transparent to-scrim/80 pb-6 pt-9"
+                    : "top-0 bg-gradient-to-t from-transparent to-scrim/80 pb-9 pt-6",
+                ].join(" ")}
+              >
+                {panel.caption}
+              </figcaption>
+            )}
 
-                {panel.variant === "photo-caption" && panel.caption && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      padding: "18px 22px 18px",
-                      background: "linear-gradient(180deg, transparent, rgba(255,231,240,.96) 55%)",
-                    }}
-                  >
-                    <div style={{ fontFamily: fonts.body, fontStyle: "italic", fontWeight: 800, fontSize: 15, color: colors.inkPlum, textShadow: "0 1px 2px rgba(255,255,255,.6)" }}>
-                      {panel.caption}
-                    </div>
-                  </div>
-                )}
+            {panel.variant === "photo-caption" && panel.caption && (
+              <figcaption
+                className="absolute inset-x-0 bottom-0 bg-gradient-to-b from-transparent
+                           via-surface/80 to-surface px-6 pb-5 pt-12 font-display text-step0
+                           font-normal italic leading-snug text-ink"
+              >
+                {panel.caption}
+              </figcaption>
+            )}
 
-                {panel.variant === "speech-bubble" && panel.caption && (
-                  <>
-                    <div style={{ position: "absolute", top: 22, left: 20, maxWidth: "70%", background: "#fff", borderRadius: 20, padding: "12px 16px", boxShadow: "0 6px 16px rgba(0,0,0,.18)", zIndex: 12 }}>
-                      <span style={{ fontFamily: fonts.body, fontWeight: 800, fontSize: 14.5, color: colors.inkPlum }}>{panel.caption}</span>
-                    </div>
-                    <div style={{ position: "absolute", top: 76, left: 30, width: 16, height: 16, background: "#fff", transform: "rotate(45deg)", zIndex: 11, boxShadow: "2px 2px 4px rgba(0,0,0,.1)" }} />
-                  </>
-                )}
+            {panel.variant === "speech-bubble" && panel.caption && (
+              <>
+                <figcaption
+                  className="absolute left-5 top-5 z-[12] max-w-[70%] rounded-lg border border-line
+                             bg-raised px-4 py-3 font-body text-meta font-medium leading-snug
+                             text-ink shadow-soft"
+                >
+                  {panel.caption}
+                </figcaption>
+                <div
+                  className="absolute left-[30px] top-[74px] z-[11] h-4 w-4 rotate-45 border-b
+                             border-l border-line bg-raised"
+                  aria-hidden="true"
+                />
+              </>
+            )}
 
-                {panel.variant === "thought-bubble" && panel.caption && (
-                  <>
-                    <div style={{ position: "absolute", top: 20, right: 20, maxWidth: "72%", background: "#fff", borderRadius: 26, padding: "14px 18px", boxShadow: "0 6px 16px rgba(0,0,0,.18)", zIndex: 12 }}>
-                      <span style={{ fontFamily: fonts.body, fontWeight: 800, fontStyle: "italic", fontSize: 14, color: colors.inkPlum }}>{panel.caption}</span>
-                    </div>
-                    <div style={{ position: "absolute", top: 66, right: 66, width: 12, height: 12, borderRadius: 999, background: "#fff", boxShadow: "0 3px 6px rgba(0,0,0,.12)", zIndex: 11 }} />
-                    <div style={{ position: "absolute", top: 78, right: 52, width: 8, height: 8, borderRadius: 999, background: "#fff", boxShadow: "0 2px 4px rgba(0,0,0,.12)", zIndex: 11 }} />
-                  </>
-                )}
+            {panel.variant === "thought-bubble" && panel.caption && (
+              <>
+                <figcaption
+                  className="absolute right-5 top-5 z-[12] max-w-[72%] rounded-lg border border-line
+                             bg-raised px-4 py-3 font-body text-meta font-normal italic leading-snug
+                             text-ink shadow-soft"
+                >
+                  {panel.caption}
+                </figcaption>
+                <div
+                  className="absolute right-[66px] top-[66px] z-[11] h-3 w-3 rounded-full border
+                             border-line bg-raised"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute right-[52px] top-[80px] z-[11] h-2 w-2 rounded-full border
+                             border-line bg-raised"
+                  aria-hidden="true"
+                />
+              </>
+            )}
           </div>
 
-          <LikeButton overlay />
+          <LikeButton panelId={panel.id} overlay />
+
+          {/* Dev-only photo swap. In production there is no click target at all,
+              so the panel never reads as interactive. */}
+          {DEV_TOOLS_ENABLED && (
+            <button
+              type="button"
+              onClick={() => setInspecting(true)}
+              aria-label={`Replace the photo for: ${panel.alt}`}
+              className="absolute inset-0 z-[6] cursor-pointer"
+            />
+          )}
         </div>
-      </motion.div>
+      </motion.figure>
 
       {DEV_TOOLS_ENABLED && inspecting && (
         <FrameInspectorModal panel={panel} onClose={() => setInspecting(false)} />
@@ -159,5 +160,3 @@ export function Panel({ panel, index }: PanelProps) {
     </>
   );
 }
-
-

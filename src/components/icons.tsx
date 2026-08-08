@@ -1,5 +1,3 @@
-import type { CSSProperties } from "react";
-
 interface IconProps {
   size?: number;
   /** Defaults to `currentColor` so icons inherit the parent's text colour —
@@ -43,17 +41,6 @@ export function SparkleIcon({ size = 20, color = "currentColor" }: IconProps) {
   );
 }
 
-export function PawPrintIcon({ size = 20, color = "currentColor" }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
-      <ellipse cx="12" cy="16" rx="6" ry="5" />
-      <circle cx="5" cy="9" r="2.6" />
-      <circle cx="10" cy="6" r="2.6" />
-      <circle cx="15" cy="6" r="2.6" />
-      <circle cx="19.5" cy="9" r="2.6" />
-    </svg>
-  );
-}
 
 export function ChevronLeftIcon({ size = 16, color = "currentColor" }: IconProps) {
   return (
@@ -63,16 +50,6 @@ export function ChevronLeftIcon({ size = 16, color = "currentColor" }: IconProps
   );
 }
 
-export function SpeakerIcon({ size = 20, color = "currentColor", muted = false }: IconProps & { muted?: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 18V6l10-2v12" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="16" cy="16" r="3" />
-      {muted && <line x1="3" y1="3" x2="21" y2="21" />}
-    </svg>
-  );
-}
 
 /** Dispatches to the right icon for a Panel sticker's `type`.
  *  Stickers are the one place each glyph carries its own colour rather than
@@ -80,14 +57,13 @@ export function SpeakerIcon({ size = 20, color = "currentColor", muted = false }
 export function StickerIcon({ type, size = 28 }: { type: "heart" | "star" | "bow" | "sparkle" } & IconProps) {
   switch (type) {
     case "heart":
-      return <HeartIcon size={size} color="#E8536B" />;
+      return <HeartIcon size={size} color="#B4636F" />;
     case "star":
-      return <StarIcon size={size} color="#E8536B" />;
+      return <StarIcon size={size} color="#B4636F" />;
     case "bow":
-      return <BowIcon size={size} color="#FF9FC0" />;
+      return <BowIcon size={size} color="#C9BAA9" />;
     case "sparkle":
-      return <SparkleIcon size={size} color="#BEE7F7" />;
+      return <SparkleIcon size={size} color="#C9BAA9" />;
   }
 }
 
-export const dropShadowStyle: CSSProperties = { filter: "drop-shadow(0 3px 5px rgba(232,83,107,.3))" };

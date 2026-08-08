@@ -1,78 +1,96 @@
 import { useState } from "react";
-import type { CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { HeartIcon, StarIcon } from "./icons";
-import { colors } from "../lib/tokens";
+import { HeartIcon } from "./icons";
 import { STATIC, useMotionPrefs } from "../lib/motion";
 
-const BURST_PARTICLES = [0, 60, 120, 180, 240, 300].map((deg, i) => ({
-  isHeart: i % 2 === 0,
-  color: [colors.cherry500, colors.pink300, colors.babyBlue200][i % 3],
-  dx: Math.round(Math.cos((deg * Math.PI) / 180) * 36),
-  dy: Math.round(Math.sin((deg * Math.PI) / 180) * 36),
+const STORE_KEY = "ou_liked_panels";
+
+function readLiked(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function writeLiked(ids: Set<string>) {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify([...ids]));
+  } catch {
+    /* private mode / quota — the heart just won't persist */
+  }
+}
+
+const BURST = [0, 60, 120, 180, 240, 300].map((deg, i) => ({
+  dx: Math.round(Math.cos((deg * Math.PI) / 180) * 30),
+  dy: Math.round(Math.sin((deg * Math.PI) / 180) * 30),
   delay: i * 0.03,
 }));
 
 export interface LikeButtonProps {
-  defaultLiked?: boolean;
-  onChange?: (liked: boolean) => void;
+  /** Panel this heart belongs to. Required for the like to persist. */
+  panelId: string;
   /** Renders as a compact overlay chip for use directly on top of an image. */
   overlay?: boolean;
+  onChange?: (liked: boolean) => void;
 }
 
-/** Like button: tap toggles a filled heart and fires a heart/star burst that settles back. */
-export function LikeButton({ defaultLiked = false, onChange, overlay = false }: LikeButtonProps) {
+/**
+ * Tap to keep a panel. Persists to localStorage keyed by panel id — the state
+ * used to live only in this component instance, so every heart she tapped
+ * vanished the moment she navigated away.
+ */
+export function LikeButton({ panelId, overlay = false, onChange }: LikeButtonProps) {
   const { reduced } = useMotionPrefs();
-  const [liked, setLiked] = useState(defaultLiked);
+  const [liked, setLiked] = useState(() => readLiked().has(panelId));
   const [bursting, setBursting] = useState(false);
 
   const handleClick = () => {
     const next = !liked;
     setLiked(next);
+
+    const ids = readLiked();
+    if (next) ids.add(panelId);
+    else ids.delete(panelId);
+    writeLiked(ids);
+
     onChange?.(next);
     if (next && !reduced) setBursting(true);
   };
 
-  const wrapperStyle: CSSProperties = overlay
-    ? { position: "absolute", zIndex: 5, bottom: 12, right: 12 }
-    : { position: "relative" };
-
   return (
-    <div style={wrapperStyle}>
+    <div className={overlay ? "absolute bottom-3 right-3 z-[5]" : "relative"}>
       <motion.button
+        type="button"
         onClick={handleClick}
         aria-pressed={liked}
-        whileTap={{ scale: 0.88 }}
-        animate={bursting ? { scale: [1, 1.3, 1] } : { scale: 1 }}
+        aria-label={liked ? "Remove this panel from your favourites" : "Keep this panel"}
+        whileTap={reduced ? undefined : { scale: 0.9 }}
+        animate={bursting ? { scale: [1, 1.25, 1] } : { scale: 1 }}
         transition={reduced ? STATIC : { duration: 0.3 }}
         onAnimationComplete={() => setBursting(false)}
-        style={{
-          width: 42,
-          height: 42,
-          borderRadius: 999,
-          background: overlay ? "rgba(255,255,255,.88)" : colors.white,
-          border: `2px solid ${colors.pink300}`,
-          color: colors.cherry500,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          boxShadow: "0 4px 10px rgba(232,83,107,.22)",
-        }}
+        className={[
+          "flex h-10 w-10 items-center justify-center rounded-full border border-line",
+          "transition-colors duration-base ease-soft",
+          liked ? "bg-raised text-accent" : "bg-raised/85 text-ink-faint hover:text-accent",
+        ].join(" ")}
       >
-        <HeartIcon size={19} filled={liked} />
+        <HeartIcon size={17} filled={liked} />
       </motion.button>
+
       <AnimatePresence>
         {bursting &&
-          BURST_PARTICLES.map((b, i) => (
+          BURST.map((b, i) => (
             <motion.div
               key={i}
-              initial={{ x: "-50%", y: "-50%", scale: 0.3, opacity: 1 }}
+              aria-hidden="true"
+              initial={{ x: "-50%", y: "-50%", scale: 0.4, opacity: 1 }}
               animate={{ x: `calc(-50% + ${b.dx}px)`, y: `calc(-50% + ${b.dy}px)`, scale: 1, opacity: 0 }}
               transition={{ duration: 0.7, delay: b.delay, ease: "easeOut" }}
-              style={{ position: "absolute", left: "50%", top: "50%", width: 14, height: 14, pointerEvents: "none" }}
+              className="pointer-events-none absolute left-1/2 top-1/2 h-2.5 w-2.5 text-accent"
             >
-              {b.isHeart ? <HeartIcon size={14} color={b.color} /> : <StarIcon size={14} color={b.color} />}
+              <HeartIcon size={10} />
             </motion.div>
           ))}
       </AnimatePresence>

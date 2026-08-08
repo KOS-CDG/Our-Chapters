@@ -1,127 +1,102 @@
-import { useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import "../styles/animations.css";
-import { colors, fonts } from "../lib/tokens";
-import { useMotionPrefs } from "../lib/motion";
+import { useEffect, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
+import { Shell } from "../components/Shell";
+import { IconButton } from "../components/ui/IconButton";
+import { CtaButton } from "../components/ui/CtaButton";
 import { getChapterBySlug, getNextChapter } from "../data/chapters";
-import { ChevronLeftIcon, PawPrintIcon } from "../components/icons";
-import { MusicToggle } from "../components/MusicToggle";
+import { ChevronLeftIcon } from "../components/icons";
 import { Panel } from "../components/Panel";
-import { RibbonIcon } from "../components/RibbonIcon";
 
-function NextChapterButton({ onClick }: { onClick: () => void }) {
-  const { reduced } = useMotionPrefs();
-  const [pressed, setPressed] = useState(false);
-  const handleClick = () => {
-    setPressed(true);
-    setTimeout(() => setPressed(false), 500);
-    onClick();
-  };
-  return (
-    <motion.button
-      onClick={handleClick}
-      animate={pressed || reduced ? {} : { scale: [1, 1.02, 1] }}
-      transition={
-        pressed || reduced ? { duration: 0.5 } : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
-      }
-      whileTap={{ scale: 0.93 }}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        fontFamily: fonts.display,
-        fontWeight: 800,
-        fontSize: 19,
-        color: colors.cherry500,
-        background: colors.white,
-        border: `3px solid ${colors.cherry500}`,
-        borderRadius: 999,
-        padding: "16px 36px",
-        cursor: "pointer",
-        boxShadow: pressed ? "0 2px 0 #E8536B, 0 4px 10px rgba(232,83,107,.25)" : "0 5px 0 #E8536B, 0 10px 22px rgba(232,83,107,.28)",
-      }}
-    >
-      <PawPrintIcon />
-      Next Chapter&nbsp;→
-    </motion.button>
-  );
+/** How far through the chapter you are, 0–1. */
+function useScrollProgress(): number {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0);
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  return progress;
 }
 
 export function ChapterReaderPage() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
+  const progress = useScrollProgress();
 
   const chapter = slug ? getChapterBySlug(slug) : undefined;
   if (!chapter) return <Navigate to="/chapters" replace />;
 
   const nextChapter = getNextChapter(chapter.number);
-  const nextLabel = nextChapter ? `Chapter ${nextChapter.number} · ${nextChapter.title}` : (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-      More chapters coming soon <RibbonIcon size={14} color={colors.cherry500} />
-    </span>
-  );
 
   return (
-    <div style={{ minHeight: "100vh", width: "100%", background: "rgba(255, 255, 255, 0.2)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", fontFamily: fonts.body, position: "relative" }}>
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          background: "rgba(255,211,228,.94)",
-          backdropFilter: "blur(10px)",
-          padding: "14px 18px",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          boxShadow: "0 4px 16px rgba(232,83,107,0.12)",
-        }}
-      >
-        <motion.button
-          onClick={() => navigate("/chapters")}
-          whileHover={{ x: -2 }}
-          whileTap={{ scale: 0.9 }}
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 999,
-            background: "#fff",
-            border: `2px solid ${colors.pink300}`,
-            color: colors.cherry500,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 4px 10px rgba(232,83,107,.18)",
-            flex: "none",
-            cursor: "pointer",
-          }}
-        >
-          <ChevronLeftIcon size={16} />
-        </motion.button>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: fonts.body, fontWeight: 800, fontSize: 10, letterSpacing: "1px", textTransform: "uppercase", color: colors.cherry500 }}>
-            Chapter {chapter.number}
-          </div>
-          <div style={{ fontFamily: fonts.display, fontWeight: 800, fontSize: 18, color: colors.inkPlum, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {chapter.title}
+    <Shell>
+      <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur-sm pt-[max(0.75rem,var(--safe-t))]">
+        <div className="mx-auto flex max-w-reader items-center gap-3 px-4 pb-3">
+          <IconButton to="/chapters" label="Back to chapter list" size={38}>
+            <ChevronLeftIcon size={16} />
+          </IconButton>
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
+              Chapter {String(chapter.number).padStart(2, "0")}
+            </p>
+            <h1 className="truncate font-display text-step1 font-normal leading-tight text-ink">
+              {chapter.title}
+            </h1>
           </div>
         </div>
+
+        {/* Reading progress. A hairline, not a bar. */}
+        <div
+          className="h-px w-full origin-left bg-accent transition-transform duration-fast ease-linear"
+          style={{ transform: `scaleX(${progress})` }}
+          aria-hidden="true"
+        />
       </header>
 
-      <MusicToggle />
-
-      <main style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 0, paddingTop: 0, paddingLeft: 0, paddingRight: 0, maxWidth: 680, margin: "0 auto" }}>
+      <main id="main" className="mx-auto flex max-w-reader flex-col gap-0 p-0">
         {chapter.panels.map((panel, i) => (
           <Panel key={panel.id} panel={panel} index={i} />
         ))}
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "48px 20px 80px" }}>
-          <NextChapterButton onClick={() => nextChapter && navigate(`/chapters/${nextChapter.slug}`)} />
-          <span style={{ fontFamily: fonts.body, fontSize: 13, fontWeight: 700, color: colors.plumLight }}>{nextLabel}</span>
+        <div className="flex flex-col items-center gap-4 px-5 pb-[max(5rem,var(--safe-b))] pt-14">
+          {nextChapter ? (
+            <>
+              <CtaButton to={`/chapters/${nextChapter.slug}`}>Next chapter</CtaButton>
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+                Chapter {String(nextChapter.number).padStart(2, "0")} · {nextChapter.title}
+              </span>
+            </>
+          ) : (
+            /* No button here at all — it used to render on the last chapter
+               with a no-op onClick, focusable and doing nothing. */
+            <>
+              <span className="block h-px w-12 bg-line" aria-hidden="true" />
+              <p className="font-display text-step1 font-normal italic text-ink-muted">
+                More chapters coming soon
+              </p>
+              <CtaButton to="/chapters" variant="quiet">
+                All chapters →
+              </CtaButton>
+            </>
+          )}
         </div>
       </main>
-    </div>
+    </Shell>
   );
 }
-

@@ -138,7 +138,7 @@ function HaruAssistiveTouch() {
       aria-label="Haru assistive touch"
     >
       {/* The bubble "chrome" — a translucent circular button in the same
-          style as the site's other floating controls (MusicToggle etc.),
+          style as the site's other floating controls,
           giving Haru real AssistiveTouch-style hardware instead of a bare
           floating image. It clips both artworks to a clean circle so
           neither image's blank canvas/corners ever show. */}
