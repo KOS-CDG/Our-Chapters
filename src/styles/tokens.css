@@ -1,0 +1,89 @@
+/* ============================================================================
+   Design tokens — three layers.
+   Components reference LAYER 2 only (via the Tailwind utilities bound to it in
+   tailwind.config.js). A palette change edits LAYER 1 and nothing else.
+   ========================================================================= */
+
+:root {
+  /* --- LAYER 1: palette -----------------------------------------------------
+     The only place a hue literal lives. Channels are space-separated so
+     Tailwind's <alpha-value> works: rgb(var(--accent) / .35)              */
+
+  --p-paper:      250 246 241;  /* #FAF6F1 warm paper */
+  --p-paper-2:    255 255 255;  /* #FFFFFF raised */
+  --p-paper-3:    241 233 225;  /* #F1E9E1 sunken */
+
+  --p-ink:         42  35  32;  /* #2A2320 warm near-black */
+  --p-ink-2:      107  95  88;  /* #6B5F58 */
+  --p-ink-3:      156 143 135;  /* #9C8F87 */
+
+  --p-rose:       180  99 111;  /* #B4636F the one accent */
+  --p-rose-deep:  148  74  86;  /* #944A56 hover/active */
+  --p-rose-tint:  239 224 225;  /* #EFE0E1 */
+
+  --p-rule:       228 218 207;  /* #E4DACF hairlines */
+  --p-scrim:       20  16  14;  /* narration gradient base */
+
+  /* --- LAYER 2: semantic roles ---------------------------------------------
+     What every component actually references. A dark mode would override
+     only this block.                                                      */
+
+  --surface:         var(--p-paper);
+  --surface-raised:  var(--p-paper-2);
+  --surface-sunken:  var(--p-paper-3);
+  --scrim:           var(--p-scrim);
+
+  --ink:             var(--p-ink);
+  --ink-muted:       var(--p-ink-2);
+  --ink-faint:       var(--p-ink-3);
+  --ink-on-accent:   var(--p-paper-2);
+
+  --accent:          var(--p-rose);
+  --accent-strong:   var(--p-rose-deep);
+  --accent-tint:     var(--p-rose-tint);
+
+  --line:            var(--p-rule);
+  --focus:           var(--p-rose);
+
+  /* --- Non-colour scales --------------------------------------------------- */
+
+  /* Radii collapse: editorial shapes are near-square. --r-full survives only
+     for the Haru bubble and the like button. */
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 10px;
+  --r-full: 999px;
+
+  /* Depth comes from whitespace and hairlines, not glow. Two shadows total. */
+  --shadow-soft: 0 1px 2px rgb(var(--ink) / .04), 0 8px 24px rgb(var(--ink) / .06);
+  --shadow-lift: 0 2px 4px rgb(var(--ink) / .05), 0 14px 36px rgb(var(--ink) / .10);
+
+  /* Fluid type scale. Display tops out at 400 weight, body at 500 — the
+     current site is 700-800 everywhere, which is why it reads loud. */
+  --step--1: clamp(0.79rem, 0.77rem + 0.10vw, 0.84rem);
+  --step-0:  clamp(1.00rem, 0.96rem + 0.18vw, 1.09rem);
+  --step-1:  clamp(1.25rem, 1.18rem + 0.36vw, 1.42rem);
+  --step-2:  clamp(1.56rem, 1.44rem + 0.62vw, 1.84rem);
+  --step-3:  clamp(1.95rem, 1.75rem + 1.01vw, 2.39rem);
+  --step-4:  clamp(2.44rem, 2.11rem + 1.61vw, 3.10rem);
+
+  --dur-fast: 0.18s;
+  --dur-base: 0.30s;
+  --dur-slow: 0.60s;
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* Reading measures — the column never grows on desktop. */
+  --measure-list:   540px;
+  --measure-reader: 680px;
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
+  /* Serif display + mono metadata is the distinctive pairing; Fraunces over
+     Playfair because its SOFT/WONK axes stay warm rather than corporate. */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
