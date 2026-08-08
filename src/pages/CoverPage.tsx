@@ -45,15 +45,13 @@ export function CoverPage() {
 
   return (
     <Shell>
-      {/* The collage video is the masthead image, not a backdrop for the whole
-          site — it only loads here. It fades into paper so the type below sits
-          on a readable base instead of on an arbitrary video frame. */}
+      {/* The collage video is the masthead image */}
       <div className="relative h-[38dvh] min-h-[240px] w-full overflow-hidden">
         <BackdropVideo />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent from-30% via-surface/50 via-75% to-surface" />
       </div>
 
-      <main className="relative mx-auto -mt-6 flex max-w-list flex-col items-center px-6 pb-[max(3rem,var(--safe-b))] text-center">
+      <main className="relative mx-auto -mt-6 flex max-w-list flex-col items-center px-6 pb-6 text-center">
         <motion.div {...enter} variants={listContainer} className="flex flex-col items-center w-full">
           <motion.span variants={fadeUp} className="mb-7 block h-px w-12 bg-line" aria-hidden="true" />
 
@@ -71,7 +69,7 @@ export function CoverPage() {
             Since 12.09.2023
           </motion.p>
 
-          {/* The monthsary reading — the one thing on this page that changes. */}
+          {/* The monthsary reading */}
           <motion.div variants={fadeUp} className="mt-3">
             {monthsary.isToday ? (
               <p className="font-display text-step1 font-normal italic text-accent">
@@ -109,19 +107,17 @@ export function CoverPage() {
               {chapterSummaries.length} chapters · our story so far
             </span>
 
-            {/* The CTA jumps straight into chapter one, so without this the
-                directory is only reachable by backing out of a chapter. */}
             <CtaButton to="/chapters" variant="quiet">
               All chapters →
             </CtaButton>
           </motion.div>
-
-          {/* Coded pixelated lavender garden with purple watercolor brush background */}
-          <motion.div variants={fadeUp} className="mt-8 w-full">
-            <PixelLavenderGarden />
-          </motion.div>
         </motion.div>
       </main>
+
+      {/* FULL BLEED EDGE-TO-EDGE PIXEL LAVENDER GARDEN AT THE VERY BOTTOM */}
+      <div className="relative w-full overflow-hidden mt-4 pb-0 mb-0">
+        <PixelLavenderGarden />
+      </div>
     </Shell>
   );
 }

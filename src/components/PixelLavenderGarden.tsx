@@ -71,13 +71,17 @@ export function PixelLavenderGarden() {
     }
   }, [isAudioEnabled]);
 
-  // Initial dense garden layout generation
+  // Initial dense garden layout generation (95 stalks spanning edge-to-edge)
   const baseStalks = useMemo(() => {
-    const total = 52;
+    const total = 95;
     return Array.from({ length: total }).map((_, i) => {
       const layer = i % 3; // 0: background, 1: midground, 2: foreground
-      const xPct = (i / (total - 1)) * 96 + (i % 2 === 0 ? 0.5 : -0.5);
-      const height = layer === 0 ? 110 + (i % 5) * 12 : layer === 1 ? 145 + (i % 7) * 14 : 180 + (i % 4) * 18;
+      // Spread from -2% to 102% so edges are completely filled with zero gaps
+      const rawPct = (i / (total - 1)) * 104 - 2;
+      const jitter = (i % 3 === 0 ? 0.4 : i % 3 === 1 ? -0.4 : 0);
+      const xPct = Math.max(-2, Math.min(102, rawPct + jitter));
+      
+      const height = layer === 0 ? 115 + (i % 5) * 12 : layer === 1 ? 150 + (i % 7) * 14 : 185 + (i % 4) * 18;
       const variantIndex = (i + layer) % LAVENDER_VARIANTS.length;
       const swayDuration = windSpeed === "calm" ? 4.5 + (i % 3) * 0.5 : windSpeed === "breeze" ? 3.2 + (i % 4) * 0.4 : 1.8 + (i % 3) * 0.3;
       const delay = (i % 9) * 0.35;
@@ -90,7 +94,7 @@ export function PixelLavenderGarden() {
         variant: LAVENDER_VARIANTS[variantIndex],
         swayDuration,
         delay,
-        scale: layer === 0 ? 0.7 : layer === 1 ? 0.9 : 1.1,
+        scale: layer === 0 ? 0.75 : layer === 1 ? 0.95 : 1.15,
       };
     });
   }, [windSpeed]);
@@ -104,7 +108,7 @@ export function PixelLavenderGarden() {
     setMousePos({ x, y });
 
     // Spawn floating sparkles/petals randomly on mouse drag/hover
-    if (Math.random() < 0.18) {
+    if (Math.random() < 0.22) {
       const colors = ["#C084FC", "#E9D5FF", "#F472B6", "#FDE047"];
       const newParticle: Particle = {
         id: `p-${Date.now()}-${Math.random()}`,
@@ -118,7 +122,7 @@ export function PixelLavenderGarden() {
         color: colors[Math.floor(Math.random() * colors.length)],
         type: Math.random() > 0.4 ? "sparkle" : "petal",
       };
-      setParticles((prev) => [...prev.slice(-30), newParticle]);
+      setParticles((prev) => [...prev.slice(-35), newParticle]);
     }
   };
 
@@ -134,8 +138,8 @@ export function PixelLavenderGarden() {
     
     const newLavender: PlantedLavender = {
       id: `planted-${Date.now()}`,
-      xPct: Math.max(2, Math.min(98, xPct)),
-      height: 160 + Math.random() * 40,
+      xPct: Math.max(0, Math.min(100, xPct)),
+      height: 165 + Math.random() * 45,
       variant: LAVENDER_VARIANTS[Math.floor(Math.random() * LAVENDER_VARIANTS.length)],
       delay: 0,
       createdAt: Date.now(),
@@ -144,7 +148,7 @@ export function PixelLavenderGarden() {
     setPlantedList((prev) => [...prev, newLavender]);
 
     // Play chime sound
-    const notes = [523.25, 587.33, 659.25, 783.99, 880.0]; // C5, D5, E5, G5, A5
+    const notes = [523.25, 587.33, 659.25, 783.99, 880.0];
     const randomNote = notes[Math.floor(Math.random() * notes.length)];
     playChime(randomNote);
 
@@ -186,44 +190,44 @@ export function PixelLavenderGarden() {
   const getAtmosphereGlow = () => {
     switch (atmosphere) {
       case "midnight":
-        return "radial-gradient(ellipse at center, rgba(88, 28, 135, 0.6) 0%, rgba(30, 27, 75, 0.4) 60%, transparent 80%)";
+        return "radial-gradient(ellipse at bottom, rgba(88, 28, 135, 0.7) 0%, rgba(30, 27, 75, 0.5) 60%, transparent 85%)";
       case "sunset":
-        return "radial-gradient(ellipse at center, rgba(244, 114, 182, 0.5) 0%, rgba(192, 132, 252, 0.3) 50%, transparent 80%)";
+        return "radial-gradient(ellipse at bottom, rgba(244, 114, 182, 0.6) 0%, rgba(192, 132, 252, 0.35) 55%, transparent 85%)";
       case "twilight":
       default:
-        return "radial-gradient(ellipse at center, rgba(167, 139, 250, 0.4) 0%, rgba(251, 207, 232, 0.25) 50%, transparent 80%)";
+        return "radial-gradient(ellipse at bottom, rgba(167, 139, 250, 0.5) 0%, rgba(251, 207, 232, 0.3) 55%, transparent 85%)";
     }
   };
 
   return (
-    <div className="relative w-full overflow-hidden pt-12 pb-2">
+    <div className="relative w-full overflow-hidden pt-8 pb-0 mb-0">
       {/* 1. ATMOSPHERE WATERCOLOR & GLOW LAYER */}
       <div className="absolute inset-0 pointer-events-none transition-all duration-700">
         <div
-          className="absolute left-1/2 bottom-0 h-[280px] w-[1200px] -translate-x-1/2 rounded-full blur-[80px] transition-all duration-700"
+          className="absolute left-1/2 bottom-0 h-[320px] w-full -translate-x-1/2 blur-[80px] transition-all duration-700"
           style={{ background: getAtmosphereGlow() }}
         />
         <div
-          className="absolute left-0 bottom-0 h-48 w-80 rounded-full blur-[60px]"
+          className="absolute left-0 bottom-0 h-56 w-96 rounded-full blur-[70px]"
           style={{
             background: atmosphere === "midnight"
-              ? "rgba(67, 56, 202, 0.4)"
-              : "rgba(244, 114, 182, 0.3)",
+              ? "rgba(67, 56, 202, 0.45)"
+              : "rgba(244, 114, 182, 0.35)",
           }}
         />
         <div
-          className="absolute right-0 bottom-0 h-48 w-80 rounded-full blur-[60px]"
+          className="absolute right-0 bottom-0 h-56 w-96 rounded-full blur-[70px]"
           style={{
             background: atmosphere === "sunset"
-              ? "rgba(217, 70, 239, 0.35)"
-              : "rgba(139, 92, 246, 0.35)",
+              ? "rgba(217, 70, 239, 0.4)"
+              : "rgba(139, 92, 246, 0.4)",
           }}
         />
       </div>
 
       {/* 2. INTERACTIVE GARDEN CONTROLS PANEL */}
-      <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 font-mono text-[11px] text-ink-muted">
-        <div className="flex items-center gap-1 rounded-full border border-line bg-surface/80 backdrop-blur-md px-3 py-1 shadow-sm">
+      <div className="relative z-20 mb-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 font-mono text-[11px] text-ink-muted">
+        <div className="flex items-center gap-1 rounded-full border border-line bg-surface/90 backdrop-blur-md px-3 py-1 shadow-sm">
           <span className="text-ink-faint mr-1">Sky:</span>
           {(["twilight", "midnight", "sunset"] as AtmosphereMode[]).map((mode) => (
             <button
@@ -240,7 +244,7 @@ export function PixelLavenderGarden() {
           ))}
         </div>
 
-        <div className="flex items-center gap-1 rounded-full border border-line bg-surface/80 backdrop-blur-md px-3 py-1 shadow-sm">
+        <div className="flex items-center gap-1 rounded-full border border-line bg-surface/90 backdrop-blur-md px-3 py-1 shadow-sm">
           <span className="text-ink-faint mr-1">Wind:</span>
           {(["calm", "breeze", "gust"] as WindSpeed[]).map((w) => (
             <button
@@ -265,7 +269,7 @@ export function PixelLavenderGarden() {
           className={`flex items-center gap-1.5 rounded-full border border-line px-3 py-1 shadow-sm transition-all ${
             isAudioEnabled
               ? "bg-purple-100 text-purple-800 border-purple-300 font-medium"
-              : "bg-surface/80 text-ink-muted hover:text-ink"
+              : "bg-surface/90 text-ink-muted hover:text-ink"
           }`}
           title="Toggle soft chime audio when planting lavenders"
         >
@@ -277,24 +281,23 @@ export function PixelLavenderGarden() {
         </span>
       </div>
 
-      {/* 3. MAIN PIXEL LAVENDER GARDEN DISPLAY AREA */}
+      {/* 3. MAIN PIXEL LAVENDER GARDEN DISPLAY AREA (Full Bleed Edge-to-Edge) */}
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onClick={handleGardenClick}
-        className="relative h-[240px] sm:h-[270px] w-full cursor-pointer select-none overflow-hidden"
+        className="relative h-[230px] sm:h-[280px] md:h-[320px] w-full cursor-pointer select-none overflow-hidden pb-0 mb-0"
       >
         {/* Render Base Lavender Stalks */}
         {baseStalks.map((stalk) => {
-          // Calculate mouse proximity tilt angle
           let tilt = 0;
           if (containerRef.current && mousePos) {
             const rect = containerRef.current.getBoundingClientRect();
             const stalkX = (stalk.xPct / 100) * rect.width;
             const dist = Math.abs(mousePos.x - stalkX);
-            if (dist < 110) {
-              const force = (1 - dist / 110) * 14;
+            if (dist < 120) {
+              const force = (1 - dist / 120) * 16;
               tilt = mousePos.x > stalkX ? -force : force;
             }
           }
@@ -328,11 +331,11 @@ export function PixelLavenderGarden() {
                 <img
                   src={stalk.variant}
                   alt="Pixel Lavender"
-                  className="pixelated block object-bottom drop-shadow-sm pointer-events-none"
+                  className="pixelated block object-bottom drop-shadow-xs pointer-events-none"
                   style={{
                     height: `${stalk.height}px`,
                     width: "auto",
-                    opacity: stalk.layer === 0 ? 0.75 : stalk.layer === 1 ? 0.9 : 1.0,
+                    opacity: stalk.layer === 0 ? 0.8 : stalk.layer === 1 ? 0.92 : 1.0,
                     filter:
                       atmosphere === "midnight"
                         ? "brightness(0.85) contrast(1.1) hue-rotate(10deg)"
@@ -412,14 +415,14 @@ export function PixelLavenderGarden() {
         {/* Ambient Fireflies in Midnight mode */}
         {atmosphere === "midnight" && (
           <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
-            {Array.from({ length: 14 }).map((_, i) => (
+            {Array.from({ length: 18 }).map((_, i) => (
               <div
                 key={`ff-${i}`}
                 className="animate-firefly absolute rounded-full bg-yellow-200 shadow-[0_0_8px_rgba(253,224,71,0.9)]"
                 style={{
                   width: `${4 + (i % 3) * 2}px`,
                   height: `${4 + (i % 3) * 2}px`,
-                  left: `${(i * 7.5) % 95}%`,
+                  left: `${(i * 5.5) % 98}%`,
                   bottom: `${20 + (i % 5) * 35}px`,
                   animationDelay: `${(i % 5) * 0.8}s`,
                   animationDuration: `${4 + (i % 4) * 1.2}s`,
@@ -429,8 +432,8 @@ export function PixelLavenderGarden() {
           </div>
         )}
 
-        {/* Soil & Grass Bed Pixel Detail Layer */}
-        <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-purple-950/20 via-purple-900/10 to-transparent pointer-events-none" />
+        {/* Soil Bed Pixel Bottom Detail Layer - Flush to bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-purple-950/25 via-purple-900/10 to-transparent pointer-events-none" />
       </div>
     </div>
   );
