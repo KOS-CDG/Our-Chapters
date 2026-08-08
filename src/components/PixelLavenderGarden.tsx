@@ -1,201 +1,436 @@
-import { useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-/**
- * A handcrafted, pure-code pixelated lavender garden with animated swaying stems,
- * cute pixel bees & butterflies, and soft purple watercolor brush backgrounds.
- * Designed to match the warm paper editorial aesthetic of the site.
- */
+type AtmosphereMode = "twilight" | "midnight" | "sunset";
+type WindSpeed = "calm" | "breeze" | "gust";
+
+interface PlantedLavender {
+  id: string;
+  xPct: number;
+  height: number;
+  variant: string;
+  delay: number;
+  createdAt: number;
+}
+
+interface Particle {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  speedX: number;
+  speedY: number;
+  rotation: number;
+  opacity: number;
+  color: string;
+  type: "petal" | "sparkle" | "firefly";
+}
+
+const LAVENDER_VARIANTS = [
+  "/lavender.png",
+  "/lavender-soft.png",
+  "/lavender-deep.png",
+  "/lavender-sunset.png",
+];
+
 export function PixelLavenderGarden() {
-  // Generate random variation for pixel lavender stalks
-  const stalks = useMemo(() => {
-    return Array.from({ length: 85 }).map((_, i) => ({
-      id: i,
-      x: i * 14 + (i % 3) * 3,
-      height: 60 + ((i * 7) % 6) * 16,
-      delay: (i % 7) * 0.4,
-      duration: 3 + (i % 4) * 0.5,
-      flowerShade: i % 3 === 0 ? "#8B5CF6" : i % 3 === 1 ? "#A78BFA" : "#C084FC",
-      flowerDark: i % 3 === 0 ? "#6D28D9" : i % 3 === 1 ? "#7C3AED" : "#9333EA",
-      flowerLight: i % 3 === 0 ? "#DDD6FE" : i % 3 === 1 ? "#E9D5FF" : "#F3E8FF",
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [atmosphere, setAtmosphere] = useState<AtmosphereMode>("twilight");
+  const [windSpeed, setWindSpeed] = useState<WindSpeed>("breeze");
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const [plantedList, setPlantedList] = useState<PlantedLavender[]>([]);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Sound Synth using Web Audio API for soothing gentle chimes
+  const playChime = useCallback((freq = 523.25) => {
+    if (!isAudioEnabled) return;
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 1.25);
+    } catch {
+      // Audio context ignored if blocked
+    }
+  }, [isAudioEnabled]);
+
+  // Initial dense garden layout generation
+  const baseStalks = useMemo(() => {
+    const total = 52;
+    return Array.from({ length: total }).map((_, i) => {
+      const layer = i % 3; // 0: background, 1: midground, 2: foreground
+      const xPct = (i / (total - 1)) * 96 + (i % 2 === 0 ? 0.5 : -0.5);
+      const height = layer === 0 ? 110 + (i % 5) * 12 : layer === 1 ? 145 + (i % 7) * 14 : 180 + (i % 4) * 18;
+      const variantIndex = (i + layer) % LAVENDER_VARIANTS.length;
+      const swayDuration = windSpeed === "calm" ? 4.5 + (i % 3) * 0.5 : windSpeed === "breeze" ? 3.2 + (i % 4) * 0.4 : 1.8 + (i % 3) * 0.3;
+      const delay = (i % 9) * 0.35;
+
+      return {
+        id: `base-${i}`,
+        xPct,
+        height,
+        layer,
+        variant: LAVENDER_VARIANTS[variantIndex],
+        swayDuration,
+        delay,
+        scale: layer === 0 ? 0.7 : layer === 1 ? 0.9 : 1.1,
+      };
+    });
+  }, [windSpeed]);
+
+  // Handle Mouse movement across garden to calculate stem deflection
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePos({ x, y });
+
+    // Spawn floating sparkles/petals randomly on mouse drag/hover
+    if (Math.random() < 0.18) {
+      const colors = ["#C084FC", "#E9D5FF", "#F472B6", "#FDE047"];
+      const newParticle: Particle = {
+        id: `p-${Date.now()}-${Math.random()}`,
+        x,
+        y,
+        size: Math.random() * 8 + 4,
+        speedX: (Math.random() - 0.2) * 2.5,
+        speedY: -(Math.random() * 2 + 1.2),
+        rotation: Math.random() * 360,
+        opacity: 1,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        type: Math.random() > 0.4 ? "sparkle" : "petal",
+      };
+      setParticles((prev) => [...prev.slice(-30), newParticle]);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos(null);
+  };
+
+  // Interactive Click to Plant extra lavender stalk
+  const handleGardenClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    
+    const newLavender: PlantedLavender = {
+      id: `planted-${Date.now()}`,
+      xPct: Math.max(2, Math.min(98, xPct)),
+      height: 160 + Math.random() * 40,
+      variant: LAVENDER_VARIANTS[Math.floor(Math.random() * LAVENDER_VARIANTS.length)],
+      delay: 0,
+      createdAt: Date.now(),
+    };
+
+    setPlantedList((prev) => [...prev, newLavender]);
+
+    // Play chime sound
+    const notes = [523.25, 587.33, 659.25, 783.99, 880.0]; // C5, D5, E5, G5, A5
+    const randomNote = notes[Math.floor(Math.random() * notes.length)];
+    playChime(randomNote);
+
+    // Burst of sparkles at click location
+    const burst: Particle[] = Array.from({ length: 8 }).map((_, i) => ({
+      id: `burst-${Date.now()}-${i}`,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      size: Math.random() * 10 + 6,
+      speedX: (Math.random() - 0.5) * 4,
+      speedY: -(Math.random() * 3 + 1.5),
+      rotation: Math.random() * 360,
+      opacity: 1,
+      color: "#E9D5FF",
+      type: "sparkle",
     }));
-  }, []);
+    setParticles((prev) => [...prev, ...burst]);
+  };
+
+  // Particle animation loop
+  useEffect(() => {
+    if (particles.length === 0) return;
+    const timer = setInterval(() => {
+      setParticles((prev) =>
+        prev
+          .map((p) => ({
+            ...p,
+            x: p.x + p.speedX,
+            y: p.y + p.speedY,
+            opacity: p.opacity - 0.025,
+          }))
+          .filter((p) => p.opacity > 0)
+      );
+    }, 30);
+    return () => clearInterval(timer);
+  }, [particles]);
+
+  // Atmosphere Styles
+  const getAtmosphereGlow = () => {
+    switch (atmosphere) {
+      case "midnight":
+        return "radial-gradient(ellipse at center, rgba(88, 28, 135, 0.6) 0%, rgba(30, 27, 75, 0.4) 60%, transparent 80%)";
+      case "sunset":
+        return "radial-gradient(ellipse at center, rgba(244, 114, 182, 0.5) 0%, rgba(192, 132, 252, 0.3) 50%, transparent 80%)";
+      case "twilight":
+      default:
+        return "radial-gradient(ellipse at center, rgba(167, 139, 250, 0.4) 0%, rgba(251, 207, 232, 0.25) 50%, transparent 80%)";
+    }
+  };
 
   return (
-    <div className="relative w-full overflow-hidden -mt-20 pt-20 pb-0 pointer-events-none">
-      {/* 1. SOFT WATERCOLOR BRUSHES OF PURPLE & PINK (Background Layer) */}
-      <div className="absolute inset-0 overflow-hidden opacity-60" aria-hidden="true">
-        {/* Soft purple watercolor wash */}
+    <div className="relative w-full overflow-hidden pt-12 pb-2">
+      {/* 1. ATMOSPHERE WATERCOLOR & GLOW LAYER */}
+      <div className="absolute inset-0 pointer-events-none transition-all duration-700">
         <div
-          className="absolute left-1/2 bottom-0 h-[300px] w-[1000px] -translate-x-1/2 rounded-full blur-[80px]"
+          className="absolute left-1/2 bottom-0 h-[280px] w-[1200px] -translate-x-1/2 rounded-full blur-[80px] transition-all duration-700"
+          style={{ background: getAtmosphereGlow() }}
+        />
+        <div
+          className="absolute left-0 bottom-0 h-48 w-80 rounded-full blur-[60px]"
           style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(167, 139, 250, 0.4) 0%, rgba(244, 114, 182, 0.2) 50%, transparent 70%)",
+            background: atmosphere === "midnight"
+              ? "rgba(67, 56, 202, 0.4)"
+              : "rgba(244, 114, 182, 0.3)",
           }}
         />
-        {/* Pink blush brush accent on the left */}
         <div
-          className="absolute left-0 bottom-0 h-64 w-96 rounded-full blur-[60px]"
+          className="absolute right-0 bottom-0 h-48 w-80 rounded-full blur-[60px]"
           style={{
-            background: "radial-gradient(circle, rgba(244, 114, 182, 0.3) 0%, transparent 70%)",
+            background: atmosphere === "sunset"
+              ? "rgba(217, 70, 239, 0.35)"
+              : "rgba(139, 92, 246, 0.35)",
           }}
         />
-        {/* Deep lavender brush accent on the right */}
-        <div
-          className="absolute right-0 bottom-0 h-64 w-96 rounded-full blur-[60px]"
-          style={{
-            background: "radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Hand-painted watercolor brush stroke SVGs */}
-        <svg
-          className="absolute bottom-4 left-1/2 h-24 w-full max-w-4xl -translate-x-1/2 opacity-40"
-          viewBox="0 0 800 80"
-          preserveAspectRatio="none"
-          fill="none"
-        >
-          <path
-            d="M-50 55C150 25 350 65 550 35C700 50 850 20 900 45"
-            stroke="#A78BFA"
-            strokeWidth="36"
-            strokeLinecap="round"
-            style={{ filter: "blur(12px)" }}
-          />
-          <path
-            d="M-20 60C200 35 400 55 600 25C750 45 850 30 920 50"
-            stroke="#F472B6"
-            strokeWidth="24"
-            strokeLinecap="round"
-            style={{ filter: "blur(10px)" }}
-          />
-        </svg>
       </div>
 
-      {/* 2. PIXELATED CUTE LAVENDER GARDEN (Foreground Code Layer) */}
-      <div className="relative flex w-full flex-col items-center">
-        {/* Container uses a min-width to ensure the garden doesn't shrink to invisible on mobile, but overflow is hidden */}
-        <div className="relative w-full overflow-hidden flex justify-center">
-          <div className="relative w-full min-w-[1200px] xl:min-w-[1400px]">
-            <svg
-              viewBox="0 0 1200 160"
-              className="w-full h-auto drop-shadow-sm"
-              preserveAspectRatio="xMidYMax slice"
-              shapeRendering="crispEdges"
+      {/* 2. INTERACTIVE GARDEN CONTROLS PANEL */}
+      <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 font-mono text-[11px] text-ink-muted">
+        <div className="flex items-center gap-1 rounded-full border border-line bg-surface/80 backdrop-blur-md px-3 py-1 shadow-sm">
+          <span className="text-ink-faint mr-1">Sky:</span>
+          {(["twilight", "midnight", "sunset"] as AtmosphereMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setAtmosphere(mode)}
+              className={`rounded-full px-2.5 py-0.5 transition-all ${
+                atmosphere === mode
+                  ? "bg-accent text-white font-medium shadow-xs"
+                  : "text-ink-muted hover:text-ink hover:bg-surface-sunken"
+              }`}
             >
-              <defs>
-                {/* Keyframe animation for pixel swaying wind */}
-                <style>{`
-                  @keyframes pixelSwaySlow {
-                    0% { transform: rotate(0deg); }
-                    50% { transform: rotate(2.5deg); }
-                    100% { transform: rotate(-2deg); }
-                  }
-                  @keyframes pixelSwayFast {
-                    0% { transform: rotate(0deg); }
-                    50% { transform: rotate(-3.5deg); }
-                    100% { transform: rotate(2deg); }
-                  }
-                  @keyframes beeHover {
-                    0%, 100% { transform: translate(0, 0); }
-                    50% { transform: translate(4px, -6px); }
-                  }
-                  @keyframes wingFlap {
-                    0%, 100% { opacity: 0.9; }
-                    50% { opacity: 0.3; }
-                  }
-                  @keyframes butterflyFloat {
-                    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                    25% { transform: translate(-5px, -8px) rotate(-5deg); }
-                    75% { transform: translate(5px, -5px) rotate(5deg); }
-                  }
-                  .sway-slow { animation: pixelSwaySlow 4.5s ease-in-out infinite; }
-                  .sway-fast { animation: pixelSwayFast 3.5s ease-in-out infinite; }
-                  .bee-anim { animation: beeHover 2.8s ease-in-out infinite; }
-                  .wing-anim { animation: wingFlap 0.15s ease-in-out infinite; }
-                  .butterfly-anim { animation: butterflyFloat 5s ease-in-out infinite; }
-                `}</style>
-
-                {/* Cute Pixel Bee */}
-                <g id="pixel-bee" className="bee-anim">
-                  {/* Bee Body */}
-                  <rect x="0" y="2" width="2" height="4" fill="#1E1B18" />
-                  <rect x="2" y="1" width="3" height="6" fill="#FBBF24" />
-                  <rect x="5" y="1" width="2" height="6" fill="#1E1B18" />
-                  <rect x="7" y="2" width="2" height="4" fill="#FBBF24" />
-                  {/* Bee Stinger */}
-                  <rect x="9" y="3" width="1" height="2" fill="#1E1B18" />
-                  {/* Bee Wings */}
-                  <g className="wing-anim">
-                    <rect x="2" y="-2" width="3" height="3" fill="#E0F2FE" opacity="0.8" />
-                    <rect x="5" y="-2" width="3" height="3" fill="#BAE6FD" opacity="0.8" />
-                  </g>
-                  {/* Eye */}
-                  <rect x="1" y="2" width="1" height="1" fill="#FFFFFF" />
-                </g>
-
-                {/* Cute Pixel Butterfly */}
-                <g id="pixel-butterfly" className="butterfly-anim">
-                  {/* Left Wings */}
-                  <rect x="0" y="0" width="4" height="4" fill="#F472B6" />
-                  <rect x="1" y="1" width="2" height="2" fill="#FBCFE8" />
-                  <rect x="1" y="4" width="3" height="3" fill="#C084FC" />
-                  {/* Right Wings */}
-                  <rect x="6" y="0" width="4" height="4" fill="#F472B6" />
-                  <rect x="7" y="1" width="2" height="2" fill="#FBCFE8" />
-                  <rect x="6" y="4" width="3" height="3" fill="#C084FC" />
-                  {/* Body */}
-                  <rect x="4" y="1" width="2" height="6" fill="#312E81" />
-                  <rect x="4" y="0" width="2" height="1" fill="#4C1D95" />
-                </g>
-              </defs>
-
-              {/* Render 85 Pixel Lavender Stalks across the bottom (No Grass Line for Organic Bleed) */}
-              {stalks.map((s) => (
-                <g key={s.id} transform={`translate(${s.x}, ${155 - s.height})`}>
-                  {/* Inner group handles the rotation so it doesn't overwrite the translate! */}
-                  <g
-                    className={s.id % 2 === 0 ? "sway-slow" : "sway-fast"}
-                    style={{ 
-                      animationDelay: `${s.delay}s`,
-                      transformOrigin: `4px ${s.height}px` 
-                    }}
-                  >
-                    {/* Stem */}
-                    <rect x="3" y="18" width="2" height={s.height - 18} fill="#4B6B4E" />
-                    <rect x="2" y={Math.floor(s.height * 0.5)} width="2" height="2" fill="#5E8362" />
-                    {/* Leaves */}
-                    <rect x="0" y={Math.floor(s.height * 0.6)} width="3" height="2" fill="#4B6B4E" />
-                    <rect x="5" y={Math.floor(s.height * 0.7)} width="3" height="2" fill="#4B6B4E" />
-                    {/* Flower Spire */}
-                    <rect x="2" y="2" width="4" height="4" fill={s.flowerLight} />
-                    <rect x="1" y="6" width="6" height="4" fill={s.flowerShade} />
-                    <rect x="0" y="10" width="8" height="4" fill={s.flowerDark} />
-                    <rect x="1" y="14" width="6" height="4" fill={s.flowerShade} />
-                    <rect x="2" y="18" width="4" height="4" fill={s.flowerLight} />
-                    {/* Flower Pixel Sparkle */}
-                    <rect x="3" y="3" width="2" height="2" fill="#FFFFFF" />
-                    <rect x="2" y="11" width="2" height="2" fill="#FFFFFF" />
-                  </g>
-                </g>
-              ))}
-
-              {/* Cute Pixel Bee 1 hovering over left garden */}
-              <use href="#pixel-bee" x="180" y="85" />
-
-              {/* Cute Pixel Bee 2 hovering over right garden (flipped) */}
-              <use href="#pixel-bee" transform="translate(1020, 95) scale(-1, 1)" />
-
-              {/* Cute Pixel Bee 3 hovering over middle-right garden */}
-              <use href="#pixel-bee" x="720" y="65" />
-
-              {/* Cute Pixel Butterfly fluttering in center-left */}
-              <use href="#pixel-butterfly" x="420" y="55" />
-              
-              {/* Cute Pixel Butterfly 2 fluttering in center-right (flipped) */}
-              <use href="#pixel-butterfly" transform="translate(850, 70) scale(-1, 1)" />
-            </svg>
-          </div>
+              {mode.charAt(0).toUpperCase() + mode.slice(1)}
+            </button>
+          ))}
         </div>
+
+        <div className="flex items-center gap-1 rounded-full border border-line bg-surface/80 backdrop-blur-md px-3 py-1 shadow-sm">
+          <span className="text-ink-faint mr-1">Wind:</span>
+          {(["calm", "breeze", "gust"] as WindSpeed[]).map((w) => (
+            <button
+              key={w}
+              onClick={() => setWindSpeed(w)}
+              className={`rounded-full px-2.5 py-0.5 transition-all ${
+                windSpeed === w
+                  ? "bg-accent text-white font-medium shadow-xs"
+                  : "text-ink-muted hover:text-ink hover:bg-surface-sunken"
+              }`}
+            >
+              {w.charAt(0).toUpperCase() + w.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => {
+            setIsAudioEnabled(!isAudioEnabled);
+            if (!isAudioEnabled) playChime(659.25);
+          }}
+          className={`flex items-center gap-1.5 rounded-full border border-line px-3 py-1 shadow-sm transition-all ${
+            isAudioEnabled
+              ? "bg-purple-100 text-purple-800 border-purple-300 font-medium"
+              : "bg-surface/80 text-ink-muted hover:text-ink"
+          }`}
+          title="Toggle soft chime audio when planting lavenders"
+        >
+          <span>{isAudioEnabled ? "🎵 Sound: On" : "🔇 Sound: Off"}</span>
+        </button>
+
+        <span className="hidden md:inline-block text-[10px] text-ink-faint italic ml-1">
+          ✦ Click garden to plant lavenders & brush cursor to sway flowers
+        </span>
+      </div>
+
+      {/* 3. MAIN PIXEL LAVENDER GARDEN DISPLAY AREA */}
+      <div
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleGardenClick}
+        className="relative h-[240px] sm:h-[270px] w-full cursor-pointer select-none overflow-hidden"
+      >
+        {/* Render Base Lavender Stalks */}
+        {baseStalks.map((stalk) => {
+          // Calculate mouse proximity tilt angle
+          let tilt = 0;
+          if (containerRef.current && mousePos) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const stalkX = (stalk.xPct / 100) * rect.width;
+            const dist = Math.abs(mousePos.x - stalkX);
+            if (dist < 110) {
+              const force = (1 - dist / 110) * 14;
+              tilt = mousePos.x > stalkX ? -force : force;
+            }
+          }
+
+          const animClass =
+            windSpeed === "calm"
+              ? "animate-pixel-calm"
+              : windSpeed === "breeze"
+              ? "animate-pixel-breeze"
+              : "animate-pixel-gust";
+
+          return (
+            <div
+              key={stalk.id}
+              className="absolute bottom-0 transition-transform duration-300 ease-out"
+              style={{
+                left: `${stalk.xPct}%`,
+                zIndex: stalk.layer + 1,
+                transform: `translateX(-50%) rotate(${tilt}deg)`,
+                transformOrigin: "bottom center",
+              }}
+            >
+              <div
+                className={animClass}
+                style={{
+                  animationDelay: `${stalk.delay}s`,
+                  animationDuration: `${stalk.swayDuration}s`,
+                  transformOrigin: "bottom center",
+                }}
+              >
+                <img
+                  src={stalk.variant}
+                  alt="Pixel Lavender"
+                  className="pixelated block object-bottom drop-shadow-sm pointer-events-none"
+                  style={{
+                    height: `${stalk.height}px`,
+                    width: "auto",
+                    opacity: stalk.layer === 0 ? 0.75 : stalk.layer === 1 ? 0.9 : 1.0,
+                    filter:
+                      atmosphere === "midnight"
+                        ? "brightness(0.85) contrast(1.1) hue-rotate(10deg)"
+                        : atmosphere === "sunset"
+                        ? "brightness(1.05) saturate(1.15)"
+                        : "none",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Render Interactive Planted Lavenders */}
+        <AnimatePresence>
+          {plantedList.map((item) => (
+            <motion.div
+              key={item.id}
+              initial={{ scale: 0.1, y: 60, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 220, damping: 15 }}
+              className="absolute bottom-0 z-30"
+              style={{
+                left: `${item.xPct}%`,
+                transform: "translateX(-50%)",
+                transformOrigin: "bottom center",
+              }}
+            >
+              <div className="animate-pixel-breeze" style={{ transformOrigin: "bottom center" }}>
+                <img
+                  src={item.variant}
+                  alt="Planted Pixel Lavender"
+                  className="pixelated block object-bottom drop-shadow-md pointer-events-none"
+                  style={{
+                    height: `${item.height}px`,
+                    width: "auto",
+                  }}
+                />
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* Dynamic Floating Particles & Sparkles */}
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="pointer-events-none absolute z-40 transition-opacity"
+            style={{
+              left: `${p.x}px`,
+              top: `${p.y}px`,
+              opacity: p.opacity,
+              transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
+            }}
+          >
+            {p.type === "sparkle" ? (
+              <img
+                src="/pixel-sparkle.png"
+                alt="Sparkle"
+                className="pixelated animate-sparkle"
+                style={{ width: `${p.size * 1.5}px`, height: "auto" }}
+              />
+            ) : (
+              <div
+                className="pixelated rounded-xs"
+                style={{
+                  width: `${p.size}px`,
+                  height: `${p.size}px`,
+                  backgroundColor: p.color,
+                  boxShadow: `0 0 6px ${p.color}`,
+                }}
+              />
+            )}
+          </div>
+        ))}
+
+        {/* Ambient Fireflies in Midnight mode */}
+        {atmosphere === "midnight" && (
+          <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div
+                key={`ff-${i}`}
+                className="animate-firefly absolute rounded-full bg-yellow-200 shadow-[0_0_8px_rgba(253,224,71,0.9)]"
+                style={{
+                  width: `${4 + (i % 3) * 2}px`,
+                  height: `${4 + (i % 3) * 2}px`,
+                  left: `${(i * 7.5) % 95}%`,
+                  bottom: `${20 + (i % 5) * 35}px`,
+                  animationDelay: `${(i % 5) * 0.8}s`,
+                  animationDuration: `${4 + (i % 4) * 1.2}s`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Soil & Grass Bed Pixel Detail Layer */}
+        <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-purple-950/20 via-purple-900/10 to-transparent pointer-events-none" />
       </div>
     </div>
   );
