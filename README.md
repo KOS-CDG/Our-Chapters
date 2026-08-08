@@ -32,9 +32,24 @@ src/
 
 ## Adding a real chapter
 
-1. Upload photos to Cloudinary under a `her-and-us/chapter-0N/...` prefix.
+**Fastest path (no account needed):** drop the image file into `public/photos/`
+(see [`public/photos/README.md`](public/photos/README.md)) and reference it
+as `cloudinaryPublicId: "/photos/your-file.jpg"` in a panel — any value
+starting with `/`, `http://`, `https://`, or `data:` is used directly, no
+Cloudinary setup required. This is the recommended way to get real photos in
+quickly.
+
+1. Get the photo into the app — either drop it in `public/photos/` (above) or upload to Cloudinary under a `her-and-us/chapter-0N/...` prefix and set up `VITE_CLOUDINARY_CLOUD_NAME`.
 2. Add/edit an entry in `src/data/chapters.ts` — chapter metadata plus a `panels` array (`size` controls panel height/pacing, `variant` picks the caption/bubble/narration treatment, `stickers` are optional corner decorations).
 3. That's it — routing, the reader strip, and the chapter list all derive from that one file.
+
+## Dev-only tools
+
+The Frame Inspector (tap-a-panel-to-upload-a-test-photo modal) and the Frame
+Mode toggle (white-placeholder vs. sample-photo switch) only render when
+running `npm run dev` (`import.meta.env.DEV`). A production build
+(`npm run build` / `npm run preview`, and whatever you deploy) never shows
+them — the person opening the real link only ever sees the story.
 
 ## Design history
 

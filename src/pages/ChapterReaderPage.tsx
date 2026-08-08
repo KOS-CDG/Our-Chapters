@@ -107,21 +107,6 @@ export function ChapterReaderPage() {
       <MusicToggle />
 
       <main style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 0, paddingTop: 0, paddingLeft: 0, paddingRight: 0, maxWidth: 680, margin: "0 auto" }}>
-        <div
-          style={{
-            background: "rgba(255, 255, 255, 0.92)",
-            backdropFilter: "blur(6px)",
-            padding: "8px 14px",
-            textAlign: "center",
-            fontFamily: fonts.body,
-            fontWeight: 800,
-            fontSize: 12,
-            color: colors.cherry500,
-            borderBottom: `1.5px solid ${colors.pink100}`,
-          }}
-        >
-          Press & hold picture to reveal text • Tap picture to modify/upload photo
-        </div>
         {chapter.panels.map((panel, i) => (
           <Panel key={panel.id} panel={panel} index={i} />
         ))}

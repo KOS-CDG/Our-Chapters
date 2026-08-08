@@ -1,11 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { colors, fonts } from "../lib/tokens";
 import { getCloudinaryUrl, getPanelSrcSet } from "../lib/cloudinary";
 import { StickerIcon, dropShadowStyle } from "./icons";
 import { LikeButton } from "./LikeButton";
 import { FrameInspectorModal } from "./FrameInspectorModal";
 import type { Panel as PanelData } from "../types/chapter";
+
+// Dev-only: tap a panel to open the photo-swap tool while building the site.
+// Never shown in the production build a partner would open.
+const DEV_TOOLS_ENABLED = import.meta.env.DEV;
 
 // Every panel is full-bleed/edge-to-edge — "size" controls pacing
 const HEIGHT_BY_SIZE: Record<PanelData["size"], string> = {
@@ -36,11 +40,7 @@ export interface PanelProps {
 
 export function Panel({ panel, index }: PanelProps) {
   const [inspecting, setInspecting] = useState(false);
-  const [isRevealed, setIsRevealed] = useState(false);
   const [, setRerender] = useState(0);
-
-  const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isLongPressRef = useRef(false);
 
   useEffect(() => {
     const handleUpdate = () => setRerender((r) => r + 1);
@@ -52,24 +52,8 @@ export function Panel({ panel, index }: PanelProps) {
     };
   }, []);
 
-  const handlePressStart = () => {
-    isLongPressRef.current = false;
-    pressTimerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      setIsRevealed(true);
-    }, 180);
-  };
-
-  const handlePressEnd = () => {
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = null;
-    }
-    if (!isLongPressRef.current) {
-      // Short click -> open frame inspector modal to modify & upload picture
-      setInspecting(true);
-    }
-    setIsRevealed(false);
+  const handleClick = () => {
+    if (DEV_TOOLS_ENABLED) setInspecting(true);
   };
 
   const height = HEIGHT_BY_SIZE[panel.size];
@@ -89,21 +73,16 @@ export function Panel({ panel, index }: PanelProps) {
             ? { duration: 0.9, ease: [0.22, 0.61, 0.36, 1] }
             : { duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }
         }
-        onMouseDown={handlePressStart}
-        onMouseUp={handlePressEnd}
-        onMouseLeave={handlePressEnd}
-        onTouchStart={handlePressStart}
-        onTouchEnd={handlePressEnd}
+        onClick={handleClick}
+        whileTap={DEV_TOOLS_ENABLED ? { scale: 0.99 } : undefined}
         style={{
           position: "relative",
           width: "100%",
           display: "block",
           lineHeight: 0,
-          cursor: "pointer",
+          cursor: DEV_TOOLS_ENABLED ? "pointer" : "default",
           margin: 0,
           padding: 0,
-          userSelect: "none",
-          WebkitUserSelect: "none",
         }}
       >
         <div
@@ -124,41 +103,11 @@ export function Panel({ panel, index }: PanelProps) {
             style={{ width: "100%", height, display: "block", objectFit: "cover", margin: 0, padding: 0, border: "none" }}
           />
 
-          {/* Text Overlays & Controls — ONLY visible during long-press hold */}
-          <AnimatePresence>
-            {isRevealed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 10 }}
-              >
-                <Stickers stickers={panel.stickers} />
+          {/* Text overlays — always visible, this is the story */}
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 10 }}>
+            <Stickers stickers={panel.stickers} />
 
-                {/* Inspect Frame Badge */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 14,
-                    right: 14,
-                    zIndex: 12,
-                    background: "rgba(255, 255, 255, 0.92)",
-                    backdropFilter: "blur(6px)",
-                    border: `1.5px solid ${colors.pink300}`,
-                    borderRadius: 999,
-                    padding: "4px 12px",
-                    fontFamily: fonts.body,
-                    fontWeight: 800,
-                    fontSize: 11,
-                    color: colors.cherry500,
-                    boxShadow: "0 4px 12px rgba(232,83,107,0.2)",
-                  }}
-                >
-                  📖 Text & Caption Revealed
-                </div>
-
-                {panel.variant === "narration" && panel.caption && (
+            {panel.variant === "narration" && panel.caption && (
                   <div
                     style={{
                       position: "absolute",
@@ -212,15 +161,13 @@ export function Panel({ panel, index }: PanelProps) {
                     <div style={{ position: "absolute", top: 78, right: 52, width: 8, height: 8, borderRadius: 999, background: "#fff", boxShadow: "0 2px 4px rgba(0,0,0,.12)", zIndex: 11 }} />
                   </>
                 )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          </div>
 
           <LikeButton overlay />
         </div>
       </motion.div>
 
-      {inspecting && (
+      {DEV_TOOLS_ENABLED && inspecting && (
         <FrameInspectorModal panel={panel} onClose={() => setInspecting(false)} />
       )}
     </>

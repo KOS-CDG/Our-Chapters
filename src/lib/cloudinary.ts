@@ -115,7 +115,7 @@ export function generateWhitePlaceholderSvg(publicId: string, width = 800, heigh
   ${
     includeText && h > 140
       ? `<text x="50%" y="${h / 2 + 42}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 35, 13), 18)}" font-weight="800" fill="#5C3A46" text-anchor="middle" letter-spacing="0.5">${title}</text>
-  <text x="50%" y="${h / 2 + 64}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 45, 11), 13)}" font-weight="600" fill="#8A5D6B" text-anchor="middle">${w} × ${h} px • White Photo Frame</text>`
+  <text x="50%" y="${h / 2 + 64}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 45, 11), 13)}" font-weight="600" fill="#8A5D6B" text-anchor="middle">✦ a memory waiting to be added ✦</text>`
       : ""
   }
 </svg>`;
@@ -128,10 +128,22 @@ function samplePlaceholderUrl(publicId: string, width = 800, height = 800): stri
   return `https://picsum.photos/seed/${seed}/${width}/${height}`;
 }
 
+/**
+ * True for a "public id" that's actually already a usable image reference —
+ * a local file dropped in /public (e.g. "/photos/panel-01.jpg") or a full
+ * URL. Lets you add real photos with zero Cloudinary account/setup: just
+ * copy the file into public/photos and point a panel at it.
+ */
+function isDirectImageRef(publicId: string): boolean {
+  return publicId.startsWith("/") || publicId.startsWith("http://") || publicId.startsWith("https://") || publicId.startsWith("data:");
+}
+
 /** Resolves a Cloudinary public id to a delivery URL, custom photo, or white placeholder SVG. */
 export function getCloudinaryUrl(publicId: string, opts: CloudinaryTransformOpts = {}): string {
   const custom = getCustomPhoto(publicId);
   if (custom) return custom;
+
+  if (isDirectImageRef(publicId)) return publicId;
 
   const { width = 800, height = 800, crop = "fill", gravity = "auto", dpr } = opts;
 
@@ -168,6 +180,8 @@ export function getPanelSrcSet(
 ): string {
   const custom = getCustomPhoto(publicId);
   if (custom) return `${custom} 1080w`;
+
+  if (isDirectImageRef(publicId)) return `${publicId} 1080w`;
 
   if (currentMode === "white" || !CLOUD_NAME) {
     // Single crisp SVG scales perfectly at all resolution widths

@@ -13,7 +13,7 @@ export function App() {
         <Route path="/chapters" element={<ChapterListPage />} />
         <Route path="/chapters/:slug" element={<ChapterReaderPage />} />
       </Routes>
-      <PlaceholderToggle />
+      {import.meta.env.DEV && <PlaceholderToggle />}
       <PenguinWidget />
     </BrowserRouter>
   );

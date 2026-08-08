@@ -23,7 +23,7 @@ export function PlaceholderToggle() {
     <div
       style={{
         position: "fixed",
-        bottom: 20,
+        bottom: 84,
         right: 20,
         zIndex: 99,
         display: "flex",

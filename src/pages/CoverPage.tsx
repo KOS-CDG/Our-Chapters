@@ -190,7 +190,7 @@ export function CoverPage() {
               style={{ width: "100%", height: 110, borderRadius: 10, objectFit: "cover" }}
             />
             <div style={{ fontFamily: fonts.body, fontSize: 10, fontWeight: 800, color: colors.cherry500, marginTop: 4 }}>
-              Chapter 1 Frame
+              Chapter 1
             </div>
           </motion.div>
 
@@ -213,7 +213,7 @@ export function CoverPage() {
               style={{ width: "100%", height: 110, borderRadius: 10, objectFit: "cover" }}
             />
             <div style={{ fontFamily: fonts.body, fontSize: 10, fontWeight: 800, color: colors.cherry500, marginTop: 4 }}>
-              Chapter 3 Frame
+              Chapter 3
             </div>
           </motion.div>
         </div>
@@ -245,7 +245,7 @@ export function CoverPage() {
             </div>
           </motion.button>
           <span style={{ fontFamily: fonts.body, fontSize: 13, fontWeight: 700, color: colors.plumLight }}>
-            5 Chapters • White Frame Preview Ready
+            5 Chapters • Our Story So Far
           </span>
         </div>
 
