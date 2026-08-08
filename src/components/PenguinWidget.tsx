@@ -513,156 +513,101 @@ function RibbonRow({ color }: { color: string }) {
   );
 }
 
-// ---------- Assistive-touch style Haru ----------
-type Edge = "left" | "right";
+// ---------- Assistive-Touch Haru ----------
+const HARU_SIZE = 82; // px — image square size
+const PEEK_PX   = 52; // how many px stay VISIBLE when resting at edge
 
 function HaruDraggable({ open, onToggle }: { open: boolean; onToggle: () => void }) {
-  const SIZE = 80; // image size in px
-  const PEEK = 28; // how many px remain visible when edge-peeking
-
-  // Edge + position along edge (0 = top, 1 = bottom)
-  const [edge, setEdge] = useState<Edge>("right");
-  const [ratio, setRatio] = useState(0.72); // 72% down the screen
-  const [dragging, setDragging] = useState(false);
+  // Persist vertical position and which side (left / right)
+  const [posY, setPosY]   = usePersist<number>("ou_haru_y", Math.round(window.innerHeight * 0.65));
+  const [side, setSide]   = usePersist<"left" | "right">("ou_haru_side", "right");
   const [hovered, setHovered] = useState(false);
 
-  const dragRef = useRef<{
-    startX: number;
-    startY: number;
-    startRatio: number;
-    startEdge: Edge;
-    moved: boolean;
-  } | null>(null);
+  const dragRef    = useRef<{ startY: number; startX: number; initPosY: number } | null>(null);
+  const hasDragged = useRef(false);
 
-  // Compute pixel position from edge + ratio
-  function getPos(e: Edge, r: number) {
-    const maxY = window.innerHeight - SIZE;
-    const y = Math.max(0, Math.min(maxY, r * window.innerHeight));
-    const x = e === "right" ? window.innerWidth - SIZE : 0;
-    return { x, y };
-  }
+  // While the panel is open OR the user is hovering → slide fully into view
+  const fullyVisible = open || hovered;
 
-  const { x, y } = getPos(edge, ratio);
+  // X-offset that hides most of the image behind the edge
+  // right side:  translateX(+offset) pushes right → off screen
+  // left  side:  translateX(-offset) pushes left  → off screen
+  const hiddenOffset = HARU_SIZE - PEEK_PX; // 30 px stays hidden
 
-  // When idle: translate partway off the edge so only PEEK px show
-  // When open or hovered: fully visible
-  const fullyVisible = open || hovered || dragging;
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragRef.current = { startY: e.clientY, startX: e.clientX, initPosY: posY };
+    hasDragged.current = false;
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    const dy = e.clientY - dragRef.current.startY;
+    const dx = e.clientX - dragRef.current.startX;
+    if (Math.abs(dy) > 5 || Math.abs(dx) > 5) hasDragged.current = true;
+
+    // Vertical drag — clamp so Haru stays on screen
+    const newY = Math.max(20, Math.min(
+      window.innerHeight - HARU_SIZE - 20,
+      dragRef.current.initPosY + dy,
+    ));
+    setPosY(newY);
+
+    // Switch sides if dragged past horizontal midpoint
+    const currentX = e.clientX;
+    if (side === "right" && currentX < window.innerWidth * 0.38) setSide("left");
+    if (side === "left"  && currentX > window.innerWidth * 0.62) setSide("right");
+  };
+
+  const handlePointerUp = () => {
+    if (!hasDragged.current) onToggle();
+    dragRef.current = null;
+  };
+
+  // For mobile: treat touchstart as hover so Haru slides out first
+  const handleTouchStart = () => setHovered(true);
+  const handleTouchEnd   = () => {
+    // Short delay so user can see Haru fully before panel opens on tap
+    setTimeout(() => setHovered(false), 600);
+  };
+
   const translateX = fullyVisible
     ? 0
-    : edge === "right"
-    ? SIZE - PEEK   // slide right, only PEEK px visible
-    : -(SIZE - PEEK); // slide left, only PEEK px visible
+    : side === "right" ? hiddenOffset : -hiddenOffset;
 
-  // ---- Pointer events ----
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startRatio: ratio,
-      startEdge: edge,
-      moved: false,
-    };
-    setDragging(true);
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-
-    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-      dragRef.current.moved = true;
-    }
-
-    if (!dragRef.current.moved) return;
-
-    // Update vertical ratio
-    const newY = e.clientY - SIZE / 2;
-    const newRatio = Math.max(0, Math.min(1, newY / window.innerHeight));
-    setRatio(newRatio);
-
-    // Switch edge based on horizontal position
-    const mid = window.innerWidth / 2;
-    if (e.clientX > mid && edge !== "right") setEdge("right");
-    if (e.clientX < mid && edge !== "left") setEdge("left");
-  };
-
-  const onPointerUp = () => {
-    setDragging(false);
-    if (!dragRef.current) return;
-    const moved = dragRef.current.moved;
-    dragRef.current = null;
-    if (!moved) onToggle(); // tap = toggle
-  };
-
-  const isPeeking = !open;
+  // Mirror image when on left side
+  const mirrorStyle: React.CSSProperties =
+    side === "left" ? { transform: "scaleX(-1)" } : {};
 
   return (
     <motion.div
       style={{
-        position: "fixed",
-        left: x,
-        top: y,
-        width: SIZE,
-        height: SIZE,
-        zIndex: 9998,
+        position:    "fixed",
+        top:         posY,
+        [side]:      0,          // anchored to chosen edge
+        zIndex:      50,
+        width:       HARU_SIZE,
+        height:      HARU_SIZE,
+        cursor:      "grab",
+        userSelect:  "none",
         touchAction: "none",
-        userSelect: "none",
-        cursor: dragging ? "grabbing" : "grab",
+        // Opacity hint: slightly translucent when idle (like iOS assistive touch)
+        opacity:     fullyVisible ? 1 : 0.72,
       }}
-      animate={{
-        x: translateX,
-        scale: open ? 1.1 : dragging ? 1.05 : 1,
-      }}
-      transition={{
-        x: { type: "spring", stiffness: 380, damping: 34 },
-        scale: { type: "spring", stiffness: 300, damping: 22 },
-      }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      aria-label={open ? "Close options" : "Open options"}
+      animate={{ x: translateX, opacity: fullyVisible ? 1 : 0.72 }}
+      transition={{ type: "spring", stiffness: 340, damping: 30 }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => !open && setHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      aria-label={open ? "Close options" : "Tap to open options, drag to move"}
     >
-      {/* Pulsing ring hint when idle and peeking */}
-      {isPeeking && !dragging && (
-        <motion.div
-          style={{
-            position: "absolute",
-            inset: -5,
-            borderRadius: "50%",
-            border: "2px solid rgba(232,83,107,.3)",
-            pointerEvents: "none",
-          }}
-          animate={{ scale: [1, 1.22, 1], opacity: [0.5, 0, 0.5] }}
-          transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-        />
-      )}
-
-      {/* Haru image — crossfades between peeking and normal */}
+      {/* Image — swaps between peek and normal */}
       <AnimatePresence mode="wait">
-        {isPeeking ? (
-          <motion.img
-            key="peek"
-            src="/peekingharu.webp"
-            alt="Haru peeking"
-            draggable={false}
-            initial={{ opacity: 0, scale: 0.82 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.78 }}
-            transition={{ duration: 0.18 }}
-            style={{
-              width: SIZE,
-              height: SIZE,
-              objectFit: "contain",
-              display: "block",
-              pointerEvents: "none",
-              filter: "drop-shadow(0 4px 10px rgba(80,40,60,.4))",
-            }}
-          />
-        ) : (
+        {open ? (
           <motion.img
             key="normal"
             src="/Haru.webp"
@@ -670,19 +615,51 @@ function HaruDraggable({ open, onToggle }: { open: boolean; onToggle: () => void
             draggable={false}
             initial={{ opacity: 0, scale: 0.82 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.78 }}
-            transition={{ duration: 0.18 }}
+            exit={{ opacity: 0, scale: 0.82 }}
+            transition={{ duration: 0.2 }}
             style={{
-              width: SIZE,
-              height: SIZE,
-              objectFit: "contain",
-              display: "block",
+              width: HARU_SIZE, height: HARU_SIZE,
+              objectFit: "contain", display: "block",
               pointerEvents: "none",
-              filter: "drop-shadow(0 6px 14px rgba(80,40,60,.45))",
+              filter: "drop-shadow(0 5px 12px rgba(80,30,60,.45))",
+              ...mirrorStyle,
+            }}
+          />
+        ) : (
+          <motion.img
+            key="peek"
+            src="/peekingharu.webp"
+            alt="Haru peeking"
+            draggable={false}
+            initial={{ opacity: 0, scale: 0.82 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.82 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              width: HARU_SIZE, height: HARU_SIZE,
+              objectFit: "contain", display: "block",
+              pointerEvents: "none",
+              filter: "drop-shadow(0 5px 12px rgba(80,30,60,.35))",
+              ...mirrorStyle,
             }}
           />
         )}
       </AnimatePresence>
+
+      {/* Pulse ring — gentle hint that Haru is interactive */}
+      {!open && !hovered && (
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: -4,
+            borderRadius: "50%",
+            border: "2px solid rgba(232,83,107,.3)",
+            pointerEvents: "none",
+          }}
+          animate={{ scale: [1, 1.22, 1], opacity: [0.55, 0, 0.55] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
     </motion.div>
   );
 }
