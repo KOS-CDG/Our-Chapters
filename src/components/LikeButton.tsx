@@ -60,7 +60,9 @@ export function LikeButton({ panelId, overlay = false, onChange }: LikeButtonPro
   };
 
   return (
-    <div className={overlay ? "absolute bottom-3 right-3 z-[5]" : "relative"}>
+    /* z-20 keeps the heart above the dev-only photo-swap overlay (z-6) and the
+       caption layer (z-10) — otherwise it is unclickable while developing. */
+    <div className={overlay ? "absolute bottom-3 right-3 z-20" : "relative"}>
       <motion.button
         type="button"
         onClick={handleClick}

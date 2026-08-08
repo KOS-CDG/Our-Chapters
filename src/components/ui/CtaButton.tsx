@@ -2,6 +2,10 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useMotionPrefs } from "../../lib/motion";
 
+// Motion goes on the Link itself — a motion.div wrapper with whileTap picks up
+// a tabindex from Framer and becomes a duplicate tab stop.
+const MotionLink = motion(Link);
+
 export interface CtaButtonProps {
   children: React.ReactNode;
   to: string;
@@ -30,17 +34,16 @@ export function CtaButton({ children, to, variant = "solid" }: CtaButtonProps) {
       : ["border-b border-line px-1 py-1 text-ink-muted", "hover:border-ink hover:text-ink"].join(" ");
 
   return (
-    <motion.div whileTap={tap} className="inline-flex">
-      <Link
-        to={to}
-        className={[
-          "inline-flex items-center gap-3 rounded-sm font-mono text-meta uppercase",
-          "tracking-[0.14em] transition-colors duration-base ease-soft",
-          styles,
-        ].join(" ")}
-      >
-        {children}
-      </Link>
-    </motion.div>
+    <MotionLink
+      whileTap={tap}
+      to={to}
+      className={[
+        "inline-flex items-center gap-3 rounded-sm font-mono text-meta uppercase",
+        "tracking-[0.14em] transition-colors duration-base ease-soft",
+        styles,
+      ].join(" ")}
+    >
+      {children}
+    </MotionLink>
   );
 }

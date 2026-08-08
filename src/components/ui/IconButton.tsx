@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import { useMotionPrefs } from "../../lib/motion";
 
+// Motion goes on the Link itself — a motion.div wrapper with whileTap picks up
+// a tabindex from Framer and becomes a duplicate tab stop.
+const MotionLink = motion(Link);
+
 interface BaseProps {
   /** Required: these buttons are icon-only, so without this they announce as
    *  an unnamed button. Making it non-optional means TypeScript refuses to let
@@ -37,11 +41,9 @@ export function IconButton({ label, children, size = 40, className = "", to, onC
 
   if (to) {
     return (
-      <motion.div whileTap={tap} className="inline-flex">
-        <Link to={to} {...shared}>
-          {children}
-        </Link>
-      </motion.div>
+      <MotionLink whileTap={tap} to={to} {...shared}>
+        {children}
+      </MotionLink>
     );
   }
 

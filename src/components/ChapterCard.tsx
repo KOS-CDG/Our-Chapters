@@ -1,5 +1,10 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+
+// The Link itself is the motion element. Wrapping it in a motion.div with
+// whileTap makes Framer add tabindex to that div, producing a second, useless
+// tab stop in front of every row.
+const MotionLink = motion(Link);
 import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
 import { useMotionPrefs } from "../lib/motion";
 import { getCloudinaryUrl } from "../lib/cloudinary";
@@ -30,8 +35,7 @@ export function ChapterCard({ chapter, isNewest = false, to }: ChapterCardProps)
   const number = String(chapter.number).padStart(2, "0");
 
   return (
-    <motion.div whileTap={tap}>
-      <Link to={to} className="group flex items-center gap-4 py-5 sm:gap-5">
+    <MotionLink whileTap={tap} to={to} className="group flex items-center gap-4 py-5 sm:gap-5">
         <span className="w-6 flex-none self-start pt-1 font-mono text-meta text-ink-faint tabular-nums">
           {number}
         </span>
@@ -72,7 +76,6 @@ export function ChapterCard({ chapter, isNewest = false, to }: ChapterCardProps)
         >
           <ChevronLeftIcon size={16} />
         </span>
-      </Link>
-    </motion.div>
+    </MotionLink>
   );
 }
