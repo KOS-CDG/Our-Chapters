@@ -80,10 +80,10 @@ export function generateWhitePlaceholderSvg(publicId: string, width = 800, heigh
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#FAFCFF"/>
+      <stop offset="100%" stop-color="#F4EEE7"/>
     </linearGradient>
     <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#E8536B" flood-opacity="0.08"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#B4636F" flood-opacity="0.08"/>
     </filter>
   </defs>
 
@@ -91,31 +91,31 @@ export function generateWhitePlaceholderSvg(publicId: string, width = 800, heigh
   <rect width="100%" height="100%" fill="url(#bgGrad)"/>
 
   <!-- Subtle Dashed Inner Frame -->
-  <rect x="16" y="16" width="${Math.max(w - 32, 10)}" height="${Math.max(h - 32, 10)}" fill="none" stroke="#FFD3E4" stroke-width="1.5" stroke-dasharray="8,6" rx="12"/>
+  <rect x="16" y="16" width="${Math.max(w - 32, 10)}" height="${Math.max(h - 32, 10)}" fill="none" stroke="#E4DACF" stroke-width="1.5" stroke-dasharray="8,6" rx="12"/>
 
   <!-- Corner Crop Framing Marks -->
-  <path d="M 28 48 V 28 H 48" stroke="#E8536B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <path d="M ${w - 48} 28 H ${w - 28} V 48" stroke="#E8536B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <path d="M 28 ${h - 48} V ${h - 28} H 48" stroke="#E8536B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <path d="M ${w - 48} ${h - 28} H ${w - 28} V ${h - 48}" stroke="#E8536B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M 28 48 V 28 H 48" stroke="#B4636F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M ${w - 48} 28 H ${w - 28} V 48" stroke="#B4636F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M 28 ${h - 48} V ${h - 28} H 48" stroke="#B4636F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M ${w - 48} ${h - 28} H ${w - 28} V ${h - 48}" stroke="#B4636F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 
   <!-- Center Artwork / Photo Frame Badge -->
   <g transform="translate(${w / 2}, ${h / 2 - (includeText && h > 240 ? 24 : 0)})" filter="url(#subtleShadow)">
-    <rect x="-32" y="-24" width="64" height="48" rx="10" fill="#FFFFFF" stroke="#FF9FC0" stroke-width="2"/>
+    <rect x="-32" y="-24" width="64" height="48" rx="10" fill="#FFFFFF" stroke="#E4DACF" stroke-width="2"/>
     <!-- Sun/Moon Circle -->
-    <circle cx="-10" cy="-6" r="6" fill="#FFE7F0"/>
+    <circle cx="-10" cy="-6" r="6" fill="#EFE0E1"/>
     <!-- Mountain/Landscape lines -->
-    <path d="M -22 14 L -8 -2 L 4 14 Z" fill="#FFD3E4"/>
-    <path d="M -4 14 L 8 4 L 20 14 Z" fill="#FF9FC0"/>
+    <path d="M -22 14 L -8 -2 L 4 14 Z" fill="#E4DACF"/>
+    <path d="M -4 14 L 8 4 L 20 14 Z" fill="#C9BAA9"/>
     <!-- Small heart badge -->
-    <path d="M 18 -16 C 18 -20 14 -22 11 -19 C 8 -22 4 -20 4 -16 C 4 -12 11 -7 11 -7 C 11 -7 18 -12 18 -16 Z" fill="#E8536B"/>
+    <path d="M 18 -16 C 18 -20 14 -22 11 -19 C 8 -22 4 -20 4 -16 C 4 -12 11 -7 11 -7 C 11 -7 18 -12 18 -16 Z" fill="#B4636F"/>
   </g>
 
   <!-- Labels (Only if includeText is enabled) -->
   ${
     includeText && h > 140
-      ? `<text x="50%" y="${h / 2 + 42}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 35, 13), 18)}" font-weight="800" fill="#5C3A46" text-anchor="middle" letter-spacing="0.5">${title}</text>
-  <text x="50%" y="${h / 2 + 64}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 45, 11), 13)}" font-weight="600" fill="#8A5D6B" text-anchor="middle">✦ a memory waiting to be added ✦</text>`
+      ? `<text x="50%" y="${h / 2 + 42}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 35, 13), 18)}" font-weight="800" fill="#2A2320" text-anchor="middle" letter-spacing="0.5">${title}</text>
+  <text x="50%" y="${h / 2 + 64}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 45, 11), 13)}" font-weight="600" fill="#9C8F87" text-anchor="middle">✦ a memory waiting to be added ✦</text>`
       : ""
   }
 </svg>`;
