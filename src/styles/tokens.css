@@ -21,11 +21,6 @@
   --p-rose-deep:  148  74  86;  /* #944A56 hover/active */
   --p-rose-tint:  239 224 225;  /* #EFE0E1 */
 
-  --p-lavender:     175 145 195;  /* #AF91C3 soft lavender */
-  --p-lavender-tint: 243 236 248;  /* #F3ECF8 tint */
-  --p-purple-soft:  147 113 166;  /* #9371A6 soft purple */
-  --p-pink-blush:   242 184 198;  /* #F2B8C6 blush pink */
-
   --p-rule:       228 218 207;  /* #E4DACF hairlines */
   --p-scrim:       20  16  14;  /* narration gradient base */
 
@@ -46,11 +41,6 @@
   --accent:          var(--p-rose);
   --accent-strong:   var(--p-rose-deep);
   --accent-tint:     var(--p-rose-tint);
-
-  --lavender:        var(--p-lavender);
-  --lavender-tint:   var(--p-lavender-tint);
-  --purple-soft:     var(--p-purple-soft);
-  --pink-blush:      var(--p-pink-blush);
 
   --line:            var(--p-rule);
   --focus:           var(--p-rose);
