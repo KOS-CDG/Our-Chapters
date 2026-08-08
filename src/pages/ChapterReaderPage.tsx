@@ -9,6 +9,7 @@ import { ChevronLeftIcon, PawPrintIcon } from "../components/icons";
 import { ProgressRibbon } from "../components/ProgressRibbon";
 import { MusicToggle } from "../components/MusicToggle";
 import { Panel } from "../components/Panel";
+import { RibbonIcon } from "../components/RibbonIcon";
 
 function NextChapterButton({ onClick }: { onClick: () => void }) {
   const [pressed, setPressed] = useState(false);
@@ -20,7 +21,7 @@ function NextChapterButton({ onClick }: { onClick: () => void }) {
   return (
     <motion.button
       onClick={handleClick}
-      animate={pressed ? {} : { y: [0, -5, 0], scale: [1, 1.02, 1] }}
+      animate={pressed ? {} : { scale: [1, 1.02, 1] }}
       transition={pressed ? { duration: 0.5 } : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
       whileTap={{ scale: 0.93 }}
       style={{
@@ -54,7 +55,11 @@ export function ChapterReaderPage() {
   if (!chapter) return <Navigate to="/chapters" replace />;
 
   const nextChapter = getNextChapter(chapter.number);
-  const nextLabel = nextChapter ? `Chapter ${nextChapter.number} · ${nextChapter.title}` : "More chapters coming soon 💕";
+  const nextLabel = nextChapter ? `Chapter ${nextChapter.number} · ${nextChapter.title}` : (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      More chapters coming soon <RibbonIcon size={14} color={colors.cherry500} />
+    </span>
+  );
 
   return (
     <div style={{ minHeight: "100vh", width: "100%", background: colors.pink50, fontFamily: fonts.body, position: "relative" }}>
@@ -119,7 +124,7 @@ export function ChapterReaderPage() {
             borderBottom: `1.5px solid ${colors.pink100}`,
           }}
         >
-          👆 Press & hold picture to reveal text • Tap picture to modify/upload photo
+          Press & hold picture to reveal text • Tap picture to modify/upload photo
         </div>
         {chapter.panels.map((panel, i) => (
           <Panel key={panel.id} panel={panel} index={i} />

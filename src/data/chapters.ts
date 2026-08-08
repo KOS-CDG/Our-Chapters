@@ -65,7 +65,7 @@ function comingSoonPanel(slug: string): Chapter["panels"] {
       id: `${slug}-coming-soon`,
       cloudinaryPublicId: `her-and-us/${slug}/coming-soon`,
       alt: "This chapter hasn't been written yet",
-      caption: "This chapter is still being written — check back soon \u{1F48C}",
+      caption: "This chapter is still being written — check back soon.",
       size: "full",
       variant: "narration",
     },

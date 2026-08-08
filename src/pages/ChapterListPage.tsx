@@ -104,8 +104,11 @@ export function ChapterListPage({ chapters = chapterSummaries, isLoading = false
                 boxShadow: "0 4px 12px rgba(232,83,107,0.08)",
               }}
             />
-            <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>
-              🔍
+            <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 16, display: "flex", alignItems: "center" }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={colors.cherry500} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
             </span>
           </div>
 

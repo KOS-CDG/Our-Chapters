@@ -50,7 +50,7 @@ export function FloatingParticles({ density = "lively" }: { density?: "calm" | "
         <motion.div
           key={p.id}
           style={{ position: "absolute", left: `${p.left}%`, top: `${p.top}%`, width: p.size, height: p.size, opacity: p.opacity }}
-          animate={{ y: [0, -16, 0], rotate: [0, 10, 0] }}
+          animate={{ rotate: [0, 10, 0] }}
           transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
         >
           <ParticleIcon type={p.type} color={p.color} />

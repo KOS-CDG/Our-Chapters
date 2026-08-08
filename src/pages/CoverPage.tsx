@@ -6,6 +6,7 @@ import { colors, fonts } from "../lib/tokens";
 import { FloatingParticles } from "../components/FloatingParticles";
 import { BowIcon, SpeakerIcon } from "../components/icons";
 import { getCloudinaryUrl } from "../lib/cloudinary";
+import { RibbonIcon } from "../components/RibbonIcon";
 
 export function CoverPage() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export function CoverPage() {
   const handleStart = () => {
     setPressed(true);
     setTimeout(() => setPressed(false), 500);
-    navigate("/chapters");
+    navigate("/chapters/how-we-met");
   };
 
   const sampleCover1 = getCloudinaryUrl("her-and-us/chapter-01/cover", { width: 300, height: 360 });
@@ -171,7 +172,7 @@ export function CoverPage() {
           }}
         >
           <motion.div
-            animate={{ y: [-4, 4, -4], rotate: [-6, -4, -6] }}
+            animate={{ rotate: [-6, -4, -6] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             style={{
               width: 130,
@@ -194,7 +195,7 @@ export function CoverPage() {
           </motion.div>
 
           <motion.div
-            animate={{ y: [4, -4, 4], rotate: [5, 7, 5] }}
+            animate={{ rotate: [5, 7, 5] }}
             transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
             style={{
               width: 130,
@@ -221,7 +222,7 @@ export function CoverPage() {
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
           <motion.button
             onClick={handleStart}
-            animate={pressed ? {} : { y: [0, -6, 0], scale: [1, 1.02, 1] }}
+            animate={pressed ? {} : { scale: [1, 1.02, 1] }}
             transition={pressed ? { duration: 0.5 } : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
             whileTap={{ scale: 0.93 }}
             style={{
@@ -237,7 +238,11 @@ export function CoverPage() {
               boxShadow: pressed ? "0 2px 0 #E8536B, 0 4px 10px rgba(232,83,107,.25)" : "0 5px 0 #E8536B, 0 10px 22px rgba(232,83,107,.28)",
             }}
           >
-            Start Reading&nbsp;→
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <RibbonIcon size={20} color={colors.cherry500} />
+              <span>Start Reading&nbsp;→</span>
+              <RibbonIcon size={20} color={colors.cherry500} />
+            </div>
           </motion.button>
           <span style={{ fontFamily: fonts.body, fontSize: 13, fontWeight: 700, color: colors.plumLight }}>
             5 Chapters • White Frame Preview Ready
