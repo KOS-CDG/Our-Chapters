@@ -69,7 +69,10 @@ export function ChapterReaderPage() {
         />
       </header>
 
-      <main id="main" className="mx-auto flex max-w-reader flex-col gap-0 p-0">
+      {/* Hairline edges from md up so the strip reads as a deliberate printed
+          column rather than a phone-width accident floating on the page. The
+          panels stay full-bleed *within* it, so the webtoon read is unbroken. */}
+      <main id="main" className="mx-auto flex max-w-reader flex-col gap-0 p-0 md:border-x md:border-line">
         {chapter.panels.map((panel, i) => (
           <Panel key={panel.id} panel={panel} index={i} />
         ))}
