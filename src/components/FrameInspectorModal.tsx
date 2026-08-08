@@ -1,6 +1,5 @@
 import { useState, useRef, type ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { colors, fonts } from "../lib/tokens";
 import { getCloudinaryUrl, setCustomPhoto, clearCustomPhoto, getCustomPhoto } from "../lib/cloudinary";
 import type { Panel as PanelData } from "../types/chapter";
 
@@ -82,10 +81,10 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
             maxWidth: 580,
             maxHeight: "90vh",
             overflowY: "auto",
-            background: colors.white,
+            background: "rgb(var(--surface-raised))",
             borderRadius: 28,
             boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
-            border: `3px solid ${colors.pink300}`,
+            border: `3px solid rgb(var(--line))`,
             padding: 24,
             display: "flex",
             flexDirection: "column",
@@ -98,8 +97,8 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
               <span
                 style={{
                   display: "inline-block",
-                  background: colors.pink100,
-                  color: colors.cherry500,
+                  background: "rgb(var(--line))",
+                  color: "rgb(var(--accent))",
                   fontSize: 11,
                   fontWeight: 800,
                   letterSpacing: "1px",
@@ -111,7 +110,7 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
               >
                 Frame Inspector • Panel {panel.id}
               </span>
-              <h2 style={{ margin: 0, fontFamily: fonts.display, color: colors.inkPlum, fontSize: 22 }}>
+              <h2 style={{ margin: 0, fontFamily: "var(--font-display)", color: "rgb(var(--ink))", fontSize: 22 }}>
                 {panel.size.toUpperCase()} Height Frame ({panel.variant})
               </h2>
             </div>
@@ -121,9 +120,9 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
                 width: 36,
                 height: 36,
                 borderRadius: 999,
-                border: `2px solid ${colors.pink300}`,
-                background: colors.pink50,
-                color: colors.cherry500,
+                border: `2px solid rgb(var(--line))`,
+                background: "rgb(var(--surface-sunken))",
+                color: "rgb(var(--accent))",
                 fontWeight: 800,
                 fontSize: 18,
                 cursor: "pointer",
@@ -150,8 +149,8 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
               height: 280,
               borderRadius: 20,
               overflow: "hidden",
-              border: dragOver ? `3px dashed ${colors.cherry500}` : `2px solid ${colors.pink100}`,
-              background: dragOver ? colors.pink50 : "#FAFAFC",
+              border: dragOver ? `3px dashed rgb(var(--accent))` : `2px solid rgb(var(--line))`,
+              background: dragOver ? "rgb(var(--surface-sunken))" : "#FAFAFC",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -173,11 +172,11 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
                 backdropFilter: "blur(6px)",
                 padding: "6px 12px",
                 borderRadius: 999,
-                fontFamily: fonts.body,
+                fontFamily: "var(--font-body)",
                 fontSize: 12,
                 fontWeight: 800,
-                color: colors.cherry500,
-                border: `1px solid ${colors.pink300}`,
+                color: "rgb(var(--accent))",
+                border: `1px solid rgb(var(--line))`,
               }}
             >
               {currentPhoto ? "📷 Custom Test Photo Active" : "⬜ White Image Frame Placeholder"}
@@ -185,11 +184,11 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
           </div>
 
           {/* Caption & Metadata details */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, background: colors.pink50, padding: 16, borderRadius: 18 }}>
-            <div style={{ fontFamily: fonts.body, fontSize: 13, fontWeight: 700, color: colors.plumLight }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "rgb(var(--surface-sunken))", padding: 16, borderRadius: 18 }}>
+            <div style={{ fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, color: "rgb(var(--ink-muted))" }}>
               Caption / Overlay:
             </div>
-            <div style={{ fontFamily: fonts.body, fontSize: 15, fontWeight: 800, color: colors.inkPlum, fontStyle: "italic" }}>
+            <div style={{ fontFamily: "var(--font-body)", fontSize: 15, fontWeight: 800, color: "rgb(var(--ink))", fontStyle: "italic" }}>
               {panel.caption ? `"${panel.caption}"` : "(No overlay caption)"}
             </div>
           </div>
@@ -209,16 +208,16 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
               style={{
                 flex: 1,
                 minWidth: 180,
-                background: colors.cherry500,
+                background: "rgb(var(--accent))",
                 color: "#fff",
                 border: "none",
                 borderRadius: 14,
                 padding: "12px 20px",
-                fontFamily: fonts.display,
+                fontFamily: "var(--font-display)",
                 fontWeight: 700,
                 fontSize: 16,
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(232,83,107,0.3)",
+                boxShadow: "var(--shadow-soft)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -232,12 +231,12 @@ export function FrameInspectorModal({ panel, onClose }: FrameInspectorModalProps
               <button
                 onClick={handleReset}
                 style={{
-                  background: colors.white,
-                  color: colors.cherry500,
-                  border: `2px solid ${colors.cherry500}`,
+                  background: "rgb(var(--surface-raised))",
+                  color: "rgb(var(--accent))",
+                  border: `2px solid rgb(var(--accent))`,
                   borderRadius: 14,
                   padding: "12px 18px",
-                  fontFamily: fonts.body,
+                  fontFamily: "var(--font-body)",
                   fontWeight: 800,
                   fontSize: 14,
                   cursor: "pointer",
