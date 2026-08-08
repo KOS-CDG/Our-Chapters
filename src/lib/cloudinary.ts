@@ -71,7 +71,7 @@ function formatPublicIdTitle(publicId: string): string {
  * Features crisp white background, framing crop marks, photo icon,
  * dimension badge, and panel title label.
  */
-export function generateWhitePlaceholderSvg(publicId: string, width = 800, height = 800): string {
+export function generateWhitePlaceholderSvg(publicId: string, width = 800, height = 800, includeText = false): string {
   const title = formatPublicIdTitle(publicId);
   const w = width;
   const h = height;
@@ -100,7 +100,7 @@ export function generateWhitePlaceholderSvg(publicId: string, width = 800, heigh
   <path d="M ${w - 48} ${h - 28} H ${w - 28} V ${h - 48}" stroke="#E8536B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 
   <!-- Center Artwork / Photo Frame Badge -->
-  <g transform="translate(${w / 2}, ${h / 2 - (h > 240 ? 24 : 0)})" filter="url(#subtleShadow)">
+  <g transform="translate(${w / 2}, ${h / 2 - (includeText && h > 240 ? 24 : 0)})" filter="url(#subtleShadow)">
     <rect x="-32" y="-24" width="64" height="48" rx="10" fill="#FFFFFF" stroke="#FF9FC0" stroke-width="2"/>
     <!-- Sun/Moon Circle -->
     <circle cx="-10" cy="-6" r="6" fill="#FFE7F0"/>
@@ -111,12 +111,11 @@ export function generateWhitePlaceholderSvg(publicId: string, width = 800, heigh
     <path d="M 18 -16 C 18 -20 14 -22 11 -19 C 8 -22 4 -20 4 -16 C 4 -12 11 -7 11 -7 C 11 -7 18 -12 18 -16 Z" fill="#E8536B"/>
   </g>
 
-  <!-- Labels (Only if container height allows) -->
+  <!-- Labels (Only if includeText is enabled) -->
   ${
-    h > 140
+    includeText && h > 140
       ? `<text x="50%" y="${h / 2 + 42}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 35, 13), 18)}" font-weight="800" fill="#5C3A46" text-anchor="middle" letter-spacing="0.5">${title}</text>
-  <text x="50%" y="${h / 2 + 64}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 45, 11), 13)}" font-weight="600" fill="#8A5D6B" text-anchor="middle">${w} × ${h} px • White Photo Frame</text>
-  ${h > 260 ? `<text x="50%" y="${h / 2 + 84}" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#E8536B" text-anchor="middle" opacity="0.85">✦ Click panel to test your photo ✦</text>` : ""}`
+  <text x="50%" y="${h / 2 + 64}" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.min(Math.max(w / 45, 11), 13)}" font-weight="600" fill="#8A5D6B" text-anchor="middle">${w} × ${h} px • White Photo Frame</text>`
       : ""
   }
 </svg>`;
