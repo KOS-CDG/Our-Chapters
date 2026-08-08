@@ -65,6 +65,41 @@ quickly.
 2. Add/edit an entry in `src/data/chapters.ts` — chapter metadata plus a `panels` array (`size` controls panel height/pacing, `variant` picks the caption/bubble/narration treatment, `stickers` are optional corner decorations).
 3. That's it — routing, the reader strip, and the chapter list all derive from that one file.
 
+### The video chapters
+
+The five chapters currently in the app are built from the numbered clips in
+`public/videos/` rather than from photos. The numbers *are* the running order,
+so the whole story reads 1 → 35 straight through and a chapter is just a slice
+of that run. The slicing lives in one map at the top of `src/data/chapters.ts`:
+
+```ts
+const chapterClips: Record<string, number[]> = {
+  "how-we-met":     [1, 2, 3, 4, 5, 6, 7],
+  "the-first-text": [8, 9, 10, 11, 12, 13, 14],
+  // ...
+};
+```
+
+Moving a clip between chapters, reordering the story, or adding new footage is
+an edit to that map and nothing else — the panels, the chapter list thumbnails
+(each chapter previews its own opening clip) and the cover plates all derive
+from it. A chapter with no clips listed falls back to a "coming soon" panel.
+
+**Panels carry no captions yet**, deliberately — the words for this footage
+haven't been written, and `variant: "photo"` is the one treatment that renders
+no `figcaption`. To add writing to a clip, switch its `variant` to `narration`,
+`photo-caption`, `speech-bubble` or `thought-bubble` and give it a `caption`.
+
+**`34.mp4` is not in the repo.** The clips run 1–33 and then 35, so there are 34
+of them, not 35. When the missing one turns up, drop it into `public/videos/`
+and add `34` to `meeting-the-friends` in the map.
+
+Playback is gated on visibility (`src/lib/useInViewPlayback.ts`): a clip is not
+fetched until it is within 200px of the viewport, and it pauses again once it
+leaves. Without that, opening a chapter would start seven simultaneous
+downloads and decodes. Reduced-motion and data-saver visitors get a paused
+first frame instead of a playing clip, everywhere a clip appears.
+
 ## Dev-only tools
 
 The Frame Inspector (tap-a-panel-to-upload-a-test-photo modal) and the Frame
