@@ -3,10 +3,8 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/animations.css";
 import { colors, fonts } from "../lib/tokens";
-import { useScrollProgress } from "../hooks/useScrollProgress";
 import { getChapterBySlug, getNextChapter } from "../data/chapters";
 import { ChevronLeftIcon, PawPrintIcon } from "../components/icons";
-import { ProgressRibbon } from "../components/ProgressRibbon";
 import { MusicToggle } from "../components/MusicToggle";
 import { Panel } from "../components/Panel";
 import { RibbonIcon } from "../components/RibbonIcon";
@@ -49,7 +47,6 @@ function NextChapterButton({ onClick }: { onClick: () => void }) {
 export function ChapterReaderPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const progress = useScrollProgress();
 
   const chapter = slug ? getChapterBySlug(slug) : undefined;
   if (!chapter) return <Navigate to="/chapters" replace />;
@@ -107,7 +104,6 @@ export function ChapterReaderPage() {
         </div>
       </header>
 
-      <ProgressRibbon progress={progress} />
       <MusicToggle />
 
       <main style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 0, paddingTop: 0, paddingLeft: 0, paddingRight: 0, maxWidth: 680, margin: "0 auto" }}>
