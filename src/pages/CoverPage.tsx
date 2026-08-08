@@ -8,6 +8,7 @@ import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
 import { CoverThumb } from "../components/CoverThumb";
 import { chapterSummaries } from "../data/chapters";
 import type { ChapterSummary } from "../types/chapter";
+import { PixelLavenderGarden } from "../components/PixelLavenderGarden";
 
 /** One of the two chapter previews under the masthead. */
 function Plate({
@@ -53,7 +54,7 @@ export function CoverPage() {
       </div>
 
       <main className="relative mx-auto -mt-6 flex max-w-list flex-col items-center px-6 pb-[max(3rem,var(--safe-b))] text-center">
-        <motion.div {...enter} variants={listContainer} className="flex flex-col items-center">
+        <motion.div {...enter} variants={listContainer} className="flex flex-col items-center w-full">
           <motion.span variants={fadeUp} className="mb-7 block h-px w-12 bg-line" aria-hidden="true" />
 
           <motion.h1
@@ -113,6 +114,11 @@ export function CoverPage() {
             <CtaButton to="/chapters" variant="quiet">
               All chapters →
             </CtaButton>
+          </motion.div>
+
+          {/* Coded pixelated lavender garden with purple watercolor brush background */}
+          <motion.div variants={fadeUp} className="mt-8 w-full">
+            <PixelLavenderGarden />
           </motion.div>
         </motion.div>
       </main>
