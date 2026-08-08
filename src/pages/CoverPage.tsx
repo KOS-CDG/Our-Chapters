@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/animations.css";
 import { colors, fonts } from "../lib/tokens";
+import { STATIC, useMotionPrefs } from "../lib/motion";
 import { BowIcon, SpeakerIcon } from "../components/icons";
 import { getCloudinaryUrl } from "../lib/cloudinary";
 import { RibbonIcon } from "../components/RibbonIcon";
 
 export function CoverPage() {
   const navigate = useNavigate();
+  const { reduced } = useMotionPrefs();
   const [soundOn, setSoundOn] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [, setRerender] = useState(0);
@@ -87,7 +89,7 @@ export function CoverPage() {
         {/* Hero Branding */}
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
 
-          <div style={{ animation: "wiggle 4s ease-in-out infinite", marginTop: 4 }}>
+          <div style={{ animation: reduced ? undefined : "wiggle 4s ease-in-out infinite", marginTop: 4 }}>
             <BowIcon size={52} color={colors.cherry500} />
           </div>
           <h1
@@ -145,8 +147,8 @@ export function CoverPage() {
           }}
         >
           <motion.div
-            animate={{ rotate: [-6, -4, -6] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            animate={reduced ? { rotate: -6 } : { rotate: [-6, -4, -6] }}
+            transition={reduced ? STATIC : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
             style={{
               width: 130,
               height: 155,
@@ -168,8 +170,8 @@ export function CoverPage() {
           </motion.div>
 
           <motion.div
-            animate={{ rotate: [5, 7, 5] }}
-            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+            animate={reduced ? { rotate: 5 } : { rotate: [5, 7, 5] }}
+            transition={reduced ? STATIC : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
             style={{
               width: 130,
               height: 155,
@@ -195,8 +197,10 @@ export function CoverPage() {
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
           <motion.button
             onClick={handleStart}
-            animate={pressed ? {} : { scale: [1, 1.02, 1] }}
-            transition={pressed ? { duration: 0.5 } : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+            animate={pressed || reduced ? {} : { scale: [1, 1.02, 1] }}
+            transition={
+              pressed || reduced ? { duration: 0.5 } : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
+            }
             whileTap={{ scale: 0.93 }}
             style={{
               fontFamily: fonts.display,

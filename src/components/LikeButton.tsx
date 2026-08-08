@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { HeartIcon, StarIcon } from "./icons";
 import { colors } from "../lib/tokens";
+import { STATIC, useMotionPrefs } from "../lib/motion";
 
 const BURST_PARTICLES = [0, 60, 120, 180, 240, 300].map((deg, i) => ({
   isHeart: i % 2 === 0,
@@ -21,6 +22,7 @@ export interface LikeButtonProps {
 
 /** Like button: tap toggles a filled heart and fires a heart/star burst that settles back. */
 export function LikeButton({ defaultLiked = false, onChange, overlay = false }: LikeButtonProps) {
+  const { reduced } = useMotionPrefs();
   const [liked, setLiked] = useState(defaultLiked);
   const [bursting, setBursting] = useState(false);
 
@@ -28,7 +30,7 @@ export function LikeButton({ defaultLiked = false, onChange, overlay = false }: 
     const next = !liked;
     setLiked(next);
     onChange?.(next);
-    if (next) setBursting(true);
+    if (next && !reduced) setBursting(true);
   };
 
   const wrapperStyle: CSSProperties = overlay
@@ -42,7 +44,7 @@ export function LikeButton({ defaultLiked = false, onChange, overlay = false }: 
         aria-pressed={liked}
         whileTap={{ scale: 0.88 }}
         animate={bursting ? { scale: [1, 1.3, 1] } : { scale: 1 }}
-        transition={{ duration: 0.3 }}
+        transition={reduced ? STATIC : { duration: 0.3 }}
         onAnimationComplete={() => setBursting(false)}
         style={{
           width: 42,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { colors, fonts } from "../lib/tokens";
+import { useMotionPrefs } from "../lib/motion";
 import { getCloudinaryUrl, getPanelSrcSet } from "../lib/cloudinary";
 import { StickerIcon, dropShadowStyle } from "./icons";
 import { LikeButton } from "./LikeButton";
@@ -39,6 +40,7 @@ export interface PanelProps {
 }
 
 export function Panel({ panel, index }: PanelProps) {
+  const { reveal } = useMotionPrefs();
   const [inspecting, setInspecting] = useState(false);
   const [, setRerender] = useState(0);
 
@@ -65,14 +67,7 @@ export function Panel({ panel, index }: PanelProps) {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: isFullBleed ? 36 : 22 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={
-          isFullBleed
-            ? { duration: 0.9, ease: [0.22, 0.61, 0.36, 1] }
-            : { duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }
-        }
+        {...reveal(isFullBleed ? 36 : 22)}
         onClick={handleClick}
         whileTap={DEV_TOOLS_ENABLED ? { scale: 0.99 } : undefined}
         style={{

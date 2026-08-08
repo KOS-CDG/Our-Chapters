@@ -3,6 +3,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/animations.css";
 import { colors, fonts } from "../lib/tokens";
+import { useMotionPrefs } from "../lib/motion";
 import { getChapterBySlug, getNextChapter } from "../data/chapters";
 import { ChevronLeftIcon, PawPrintIcon } from "../components/icons";
 import { MusicToggle } from "../components/MusicToggle";
@@ -10,6 +11,7 @@ import { Panel } from "../components/Panel";
 import { RibbonIcon } from "../components/RibbonIcon";
 
 function NextChapterButton({ onClick }: { onClick: () => void }) {
+  const { reduced } = useMotionPrefs();
   const [pressed, setPressed] = useState(false);
   const handleClick = () => {
     setPressed(true);
@@ -19,8 +21,10 @@ function NextChapterButton({ onClick }: { onClick: () => void }) {
   return (
     <motion.button
       onClick={handleClick}
-      animate={pressed ? {} : { scale: [1, 1.02, 1] }}
-      transition={pressed ? { duration: 0.5 } : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+      animate={pressed || reduced ? {} : { scale: [1, 1.02, 1] }}
+      transition={
+        pressed || reduced ? { duration: 0.5 } : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+      }
       whileTap={{ scale: 0.93 }}
       style={{
         display: "flex",

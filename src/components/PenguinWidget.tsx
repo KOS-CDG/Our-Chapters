@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { colors } from "../lib/tokens";
+import { useMotionPrefs } from "../lib/motion";
 
 // ---------- Persistent position ----------
 function usePersist<T>(key: string, initial: T) {
@@ -19,7 +20,8 @@ const HIDDEN  = SIZE - PEEK_PX; // px pushed off-screen at rest
 // all move on the same physical timing — like real iOS AssistiveTouch, where
 // the bubble sliding, fading, and resizing reads as one continuous gesture
 // instead of a few separately-timed animations landing at different moments.
-const SPRING = { type: "spring", stiffness: 420, damping: 34, mass: 0.9 } as const;
+// Lives in lib/motion.ts as SPRING_UI; useMotionPrefs() swaps it for an
+// instant transition when the reader has asked for reduced motion.
 
 // ---------- Peeking artwork crop ----------
 // peekingharu.webp is a tall 1128x2048 canvas with Haru drawn off to the
@@ -48,6 +50,7 @@ export function PenguinWidget() {
 
 // ---------- Assistive-Touch Haru ----------
 function HaruAssistiveTouch() {
+  const { spring } = useMotionPrefs();
   const [posY, setPosY] = usePersist<number>(
     "ou_haru_y",
     Math.round((typeof window !== "undefined" ? window.innerHeight : 700) * 0.62),
@@ -124,7 +127,7 @@ function HaruAssistiveTouch() {
         touchAction: "none",
       }}
       animate={{ x: translateX, opacity: visible ? 1 : 0.62, scale }}
-      transition={SPRING}
+      transition={spring}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -156,7 +159,7 @@ function HaruAssistiveTouch() {
             peeking <-> open is one continuous motion, not a discrete cut. */}
         <motion.div
           animate={{ opacity: open ? 0 : 1, scale: open ? 0.8 : 1 }}
-          transition={SPRING}
+          transition={spring}
           style={{
             position: "absolute", inset: 0,
             ...peekArtStyle,
@@ -168,7 +171,7 @@ function HaruAssistiveTouch() {
           alt="Haru"
           draggable={false}
           animate={{ opacity: open ? 1 : 0, scale: open ? 1 : 1.12 }}
-          transition={SPRING}
+          transition={spring}
           style={{
             position: "absolute", inset: 0,
             width: SIZE, height: SIZE,
