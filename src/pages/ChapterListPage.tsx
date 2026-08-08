@@ -1,23 +1,54 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../styles/animations.css";
-import { colors, fonts } from "../lib/tokens";
+import { Shell } from "../components/Shell";
+import { IconButton } from "../components/ui/IconButton";
+import { listContainer, listItem, useMotionPrefs } from "../lib/motion";
 import { chapterSummaries } from "../data/chapters";
 import { ChapterCard } from "../components/ChapterCard";
-import { ChapterCardSkeleton, EmptyState } from "../components/ChapterListStates";
-import { BowIcon, ChevronLeftIcon } from "../components/icons";
+import { ChapterListSkeleton, EmptyState } from "../components/ChapterListStates";
+import { ChevronLeftIcon } from "../components/icons";
 import type { ChapterSummary } from "../types/chapter";
+
+type SortOrder = "chronological" | "recent-first";
 
 export interface ChapterListPageProps {
   chapters?: ChapterSummary[];
   isLoading?: boolean;
-  sortOrder?: "chronological" | "recent-first";
+  sortOrder?: SortOrder;
 }
 
-export function ChapterListPage({ chapters = chapterSummaries, isLoading = false, sortOrder: initialSort = "chronological" }: ChapterListPageProps) {
-  const navigate = useNavigate();
-  const [currentSort, setCurrentSort] = useState<"chronological" | "recent-first">(initialSort);
+function SortToggle({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={[
+        "border-b pb-0.5 font-mono text-[11px] uppercase tracking-[0.12em]",
+        "transition-colors duration-fast ease-soft",
+        active ? "border-ink text-ink" : "border-transparent text-ink-faint hover:text-ink-muted",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function ChapterListPage({
+  chapters = chapterSummaries,
+  isLoading = false,
+  sortOrder: initialSort = "chronological",
+}: ChapterListPageProps) {
+  const { enter } = useMotionPrefs();
+  const [currentSort, setCurrentSort] = useState<SortOrder>(initialSort);
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredAndSorted = useMemo(() => {
@@ -34,164 +65,77 @@ export function ChapterListPage({ chapters = chapterSummaries, isLoading = false
   const isEmpty = !isLoading && filteredAndSorted.length === 0;
 
   return (
-    <div style={{ minHeight: "100vh", width: "100%", background: "rgba(255, 255, 255, 0.2)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", fontFamily: fonts.body, position: "relative" }}>
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          background: "rgba(255,211,228,.94)",
-          backdropFilter: "blur(10px)",
-          padding: "16px 20px 12px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          boxShadow: "0 4px 16px rgba(232,83,107,0.12)",
-        }}
-      >
-        <motion.button
-          onClick={() => navigate("/")}
-          whileHover={{ x: -2 }}
-          whileTap={{ scale: 0.9 }}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 999,
-            background: "#fff",
-            border: `2px solid ${colors.pink300}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 4px 10px rgba(232,83,107,.18)",
-            flex: "none",
-            cursor: "pointer",
-          }}
-        >
-          <ChevronLeftIcon />
-        </motion.button>
-        <div style={{ textAlign: "center" }}>
-          <h1 style={{ margin: 0, fontFamily: fonts.display, fontWeight: 800, fontSize: 22, color: colors.cherry500 }}>
-            Chapter Directory
-          </h1>
-          <span style={{ fontSize: 11, fontWeight: 700, color: colors.plumLight }}>
-            {chapters.length} Chapters Published
-          </span>
+    <Shell>
+      <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur-sm pt-[max(1rem,var(--safe-t))]">
+        <div className="mx-auto flex max-w-list items-center gap-4 px-5 pb-4">
+          <IconButton to="/" label="Back to cover" size={38}>
+            <ChevronLeftIcon size={16} />
+          </IconButton>
+          <div className="min-w-0">
+            <h1 className="font-display text-step1 font-normal leading-tight text-ink">Chapters</h1>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+              {String(chapters.length).padStart(2, "0")} chapters
+            </p>
+          </div>
         </div>
-        <BowIcon size={32} color={colors.cherry500} />
       </header>
 
-      <main style={{ position: "relative", zIndex: 2, padding: "16px 18px 60px", maxWidth: 540, margin: "0 auto" }}>
-        {/* Search & Sort Controls */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 18 }}>
-          <div style={{ position: "relative", width: "100%" }}>
+      <main className="mx-auto max-w-list px-5 pb-24 pt-6">
+        <div className="flex flex-col gap-5">
+          <div>
+            <label htmlFor="chapter-search" className="sr-only">
+              Search chapters
+            </label>
             <input
-              type="text"
-              placeholder="Search chapters by title or keyword..."
+              id="chapter-search"
+              type="search"
+              placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "12px 18px 12px 42px",
-                borderRadius: 999,
-                border: `2px solid ${colors.pink300}`,
-                background: "#ffffff",
-                fontFamily: fonts.body,
-                fontSize: 14,
-                fontWeight: 700,
-                color: colors.inkPlum,
-                outline: "none",
-                boxShadow: "0 4px 12px rgba(232,83,107,0.08)",
-              }}
+              className="w-full border-b border-line bg-transparent pb-2 font-mono text-meta
+                         text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none
+                         transition-colors duration-fast ease-soft"
             />
-            <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 16, display: "flex", alignItems: "center" }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={colors.cherry500} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
-            <span style={{ fontFamily: fonts.body, fontSize: 12, fontWeight: 800, color: colors.plumLight }}>
-              Order:
-            </span>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                onClick={() => setCurrentSort("chronological")}
-                style={{
-                  background: currentSort === "chronological" ? colors.cherry500 : "#fff",
-                  color: currentSort === "chronological" ? "#fff" : colors.cherry500,
-                  border: `1.5px solid ${colors.cherry500}`,
-                  borderRadius: 999,
-                  padding: "4px 14px",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  fontFamily: fonts.body,
-                  cursor: "pointer",
-                }}
-              >
-                1 → {chapters.length} First
-              </button>
-              <button
-                onClick={() => setCurrentSort("recent-first")}
-                style={{
-                  background: currentSort === "recent-first" ? colors.cherry500 : "#fff",
-                  color: currentSort === "recent-first" ? "#fff" : colors.cherry500,
-                  border: `1.5px solid ${colors.cherry500}`,
-                  borderRadius: 999,
-                  padding: "4px 14px",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  fontFamily: fonts.body,
-                  cursor: "pointer",
-                }}
-              >
-                Latest First
-              </button>
-            </div>
+          <div role="group" aria-label="Sort order" className="flex items-center gap-4">
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">Order</span>
+            <SortToggle
+              active={currentSort === "chronological"}
+              onClick={() => setCurrentSort("chronological")}
+            >
+              First → Last
+            </SortToggle>
+            <span className="h-3 w-px bg-line" aria-hidden="true" />
+            <SortToggle
+              active={currentSort === "recent-first"}
+              onClick={() => setCurrentSort("recent-first")}
+            >
+              Latest
+            </SortToggle>
           </div>
         </div>
 
-        {isLoading && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 8 }}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <ChapterCardSkeleton key={i} />
-            ))}
-          </div>
-        )}
+        <div className="mt-4 border-t border-line">
+          {isLoading && <ChapterListSkeleton />}
 
-        {isEmpty && <EmptyState />}
+          {isEmpty && <EmptyState />}
 
-        {!isLoading && !isEmpty && (
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={{
-              hidden: { opacity: 0 },
-              show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-            }}
-            style={{ display: "flex", flexDirection: "column", gap: 16 }}
-          >
-            {filteredAndSorted.map((chapter) => (
-              <motion.div
-                key={chapter.id}
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  show: { opacity: 1, y: 0 },
-                }}
-              >
-                <ChapterCard
-                  chapter={chapter}
-                  isNewest={chapter.number === newestNumber}
-                  onSelect={() => navigate(`/chapters/${chapter.slug}`)}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+          {!isLoading && !isEmpty && (
+            <motion.ul {...enter} variants={listContainer} className="divide-y divide-line">
+              {filteredAndSorted.map((chapter) => (
+                <motion.li key={chapter.id} variants={listItem}>
+                  <ChapterCard
+                    chapter={chapter}
+                    isNewest={chapter.number === newestNumber}
+                    to={`/chapters/${chapter.slug}`}
+                  />
+                </motion.li>
+              ))}
+            </motion.ul>
+          )}
+        </div>
       </main>
-    </div>
+    </Shell>
   );
 }
-

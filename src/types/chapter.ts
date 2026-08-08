@@ -28,12 +28,6 @@ export interface Panel {
    */
   size: PanelSize;
   variant: PanelVariant;
-  /**
-   * Legacy field from the original taped-photo prototype. The reader now
-   * renders every panel full-bleed/edge-to-edge for a true manhwa strip, so
-   * rotation is no longer applied visually — kept only for data compatibility.
-   */
-  rotation?: number;
   stickers?: PanelSticker[];
 }
 

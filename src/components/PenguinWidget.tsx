@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { colors } from "../lib/tokens";
+import { useMotionPrefs } from "../lib/motion";
 
 // ---------- Persistent position ----------
 function usePersist<T>(key: string, initial: T) {
@@ -19,7 +19,8 @@ const HIDDEN  = SIZE - PEEK_PX; // px pushed off-screen at rest
 // all move on the same physical timing — like real iOS AssistiveTouch, where
 // the bubble sliding, fading, and resizing reads as one continuous gesture
 // instead of a few separately-timed animations landing at different moments.
-const SPRING = { type: "spring", stiffness: 420, damping: 34, mass: 0.9 } as const;
+// Lives in lib/motion.ts as SPRING_UI; useMotionPrefs() swaps it for an
+// instant transition when the reader has asked for reduced motion.
 
 // ---------- Peeking artwork crop ----------
 // peekingharu.webp is a tall 1128x2048 canvas with Haru drawn off to the
@@ -48,6 +49,7 @@ export function PenguinWidget() {
 
 // ---------- Assistive-Touch Haru ----------
 function HaruAssistiveTouch() {
+  const { spring } = useMotionPrefs();
   const [posY, setPosY] = usePersist<number>(
     "ou_haru_y",
     Math.round((typeof window !== "undefined" ? window.innerHeight : 700) * 0.62),
@@ -71,13 +73,13 @@ function HaruAssistiveTouch() {
   const flip: React.CSSProperties = side === "left" ? { transform: "scaleX(-1)" } : {};
 
   // ---- Pointer handlers ----
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     dragRef.current = { startY: e.clientY, startX: e.clientX, initY: posY };
     hasDragged.current = false;
   };
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!dragRef.current) return;
     const dy = e.clientY - dragRef.current.startY;
     const dx = e.clientX - dragRef.current.startX;
@@ -99,9 +101,15 @@ function HaruAssistiveTouch() {
   };
 
   const onPointerUp = () => {
-    if (!hasDragged.current) setOpen((o) => !o);
     dragRef.current = null;
     setDragging(false);
+  };
+
+  // The toggle lives on click, not pointerup. Now that this is a real <button>,
+  // the browser fires its own click after pointerup — doing both would toggle
+  // twice. hasDragged still guards against a drag counting as a tap.
+  const onClick = () => {
+    if (!hasDragged.current) setOpen((o) => !o);
   };
 
   // Mobile: brief hover-out delay so user sees Haru before it settles back
@@ -111,7 +119,8 @@ function HaruAssistiveTouch() {
   const scale = dragging ? 1.1 : open ? 1.15 : 1;
 
   return (
-    <motion.div
+    <motion.button
+      type="button"
       style={{
         position:    "fixed",
         top:         posY,
@@ -119,23 +128,28 @@ function HaruAssistiveTouch() {
         zIndex:      999,
         width:       SIZE,
         height:      SIZE,
+        padding:     0,
+        border:      "none",
+        background:  "transparent",
         cursor:      dragging ? "grabbing" : "grab",
         userSelect:  "none",
         touchAction: "none",
       }}
       animate={{ x: translateX, opacity: visible ? 1 : 0.62, scale }}
-      transition={SPRING}
+      transition={spring}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onClick={onClick}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => { if (!open) setHovered(false); }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      aria-label="Haru assistive touch"
+      aria-label="Haru"
+      aria-expanded={open}
     >
       {/* The bubble "chrome" — a translucent circular button in the same
-          style as the site's other floating controls (MusicToggle etc.),
+          style as the site's other floating controls,
           giving Haru real AssistiveTouch-style hardware instead of a bare
           floating image. It clips both artworks to a clean circle so
           neither image's blank canvas/corners ever show. */}
@@ -146,9 +160,9 @@ function HaruAssistiveTouch() {
           height: SIZE,
           borderRadius: "50%",
           overflow: "hidden",
-          background: "rgba(255,255,255,.85)",
-          border: `2px solid ${colors.pink300}`,
-          boxShadow: "0 6px 16px rgba(232,83,107,.28)",
+          background: "rgb(var(--surface-raised) / .9)",
+          border: "1px solid rgb(var(--line))",
+          boxShadow: "var(--shadow-soft)",
         }}
       >
         {/* Both artworks stay mounted and cross-fade/scale against each
@@ -156,7 +170,7 @@ function HaruAssistiveTouch() {
             peeking <-> open is one continuous motion, not a discrete cut. */}
         <motion.div
           animate={{ opacity: open ? 0 : 1, scale: open ? 0.8 : 1 }}
-          transition={SPRING}
+          transition={spring}
           style={{
             position: "absolute", inset: 0,
             ...peekArtStyle,
@@ -165,10 +179,11 @@ function HaruAssistiveTouch() {
         />
         <motion.img
           src="/Haru.webp"
-          alt="Haru"
+          alt=""
+          aria-hidden="true"
           draggable={false}
           animate={{ opacity: open ? 1 : 0, scale: open ? 1 : 1.12 }}
-          transition={SPRING}
+          transition={spring}
           style={{
             position: "absolute", inset: 0,
             width: SIZE, height: SIZE,
@@ -179,6 +194,6 @@ function HaruAssistiveTouch() {
           }}
         />
       </div>
-    </motion.div>
+    </motion.button>
   );
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { colors, fonts } from "../lib/tokens";
 import { getPlaceholderMode, setPlaceholderMode, type PlaceholderMode } from "../lib/cloudinary";
 
 export function PlaceholderToggle() {
@@ -31,7 +30,7 @@ export function PlaceholderToggle() {
         gap: 6,
         background: "rgba(255, 255, 255, 0.94)",
         backdropFilter: "blur(12px)",
-        border: `2px solid ${colors.pink300}`,
+        border: `2px solid rgb(var(--line))`,
         borderRadius: 999,
         padding: "6px 14px",
         boxShadow: "0 8px 24px rgba(232, 83, 107, 0.22)",
@@ -39,10 +38,10 @@ export function PlaceholderToggle() {
     >
       <span
         style={{
-          fontFamily: fonts.body,
+          fontFamily: "var(--font-body)",
           fontSize: 11,
           fontWeight: 800,
-          color: colors.inkPlum,
+          color: "rgb(var(--ink))",
           letterSpacing: ".4px",
           textTransform: "uppercase",
         }}
@@ -57,12 +56,12 @@ export function PlaceholderToggle() {
           display: "flex",
           alignItems: "center",
           gap: 6,
-          background: mode === "white" ? colors.cherry500 : colors.pink50,
-          color: mode === "white" ? "#fff" : colors.cherry500,
-          border: mode === "white" ? "none" : `1.5px solid ${colors.pink300}`,
+          background: mode === "white" ? "rgb(var(--accent))" : "rgb(var(--surface-sunken))",
+          color: mode === "white" ? "#fff" : "rgb(var(--accent))",
+          border: mode === "white" ? "none" : `1.5px solid rgb(var(--line))`,
           borderRadius: 999,
           padding: "4px 12px",
-          fontFamily: fonts.body,
+          fontFamily: "var(--font-body)",
           fontWeight: 800,
           fontSize: 12,
           cursor: "pointer",
