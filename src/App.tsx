@@ -3,6 +3,7 @@ import { CoverPage } from "./pages/CoverPage";
 import { ChapterListPage } from "./pages/ChapterListPage";
 import { ChapterReaderPage } from "./pages/ChapterReaderPage";
 import { PlaceholderToggle } from "./components/PlaceholderToggle";
+import { PenguinWidget } from "./components/PenguinWidget";
 
 export function App() {
   return (
@@ -13,6 +14,7 @@ export function App() {
         <Route path="/chapters/:slug" element={<ChapterReaderPage />} />
       </Routes>
       <PlaceholderToggle />
+      <PenguinWidget />
     </BrowserRouter>
   );
 }
