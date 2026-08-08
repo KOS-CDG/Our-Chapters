@@ -1,225 +1,106 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../styles/animations.css";
-import { colors, fonts } from "../lib/tokens";
-import { STATIC, useMotionPrefs } from "../lib/motion";
+import { Shell } from "../components/Shell";
+import { BackdropVideo } from "../components/BackdropVideo";
+import { CtaButton } from "../components/ui/CtaButton";
+import { fadeUp, listContainer, useMotionPrefs } from "../lib/motion";
+import { useMonthsary, ordinal } from "../lib/monthsary";
 import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
-import { BowIcon, SpeakerIcon } from "../components/icons";
 import { getCloudinaryUrl } from "../lib/cloudinary";
-import { RibbonIcon } from "../components/RibbonIcon";
+import { chapterSummaries } from "../data/chapters";
 
-export function CoverPage() {
-  const navigate = useNavigate();
-  const { reduced } = useMotionPrefs();
-  const [soundOn, setSoundOn] = useState(false);
-  const [pressed, setPressed] = useState(false);
-  usePlaceholderRefresh();
-
-  const handleStart = () => {
-    setPressed(true);
-    setTimeout(() => setPressed(false), 500);
-    navigate("/chapters/how-we-met");
-  };
-
-  const sampleCover1 = getCloudinaryUrl("her-and-us/chapter-01/cover", { width: 300, height: 360 });
-  const sampleCover2 = getCloudinaryUrl("her-and-us/chapter-03/cover", { width: 300, height: 360 });
-
+/** One of the two chapter previews under the masthead. */
+function Plate({ publicId, label }: { publicId: string; label: string }) {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        position: "relative",
-        overflowX: "hidden",
-        background: "rgba(255, 255, 255, 0.2)",
-        backdropFilter: "blur(6px)",
-        WebkitBackdropFilter: "blur(6px)",
-        fontFamily: fonts.body,
-      }}
-    >
-      <section
-        style={{
-          position: "relative",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 28,
-          padding: "60px 24px 40px",
-          textAlign: "center",
-          boxSizing: "border-box",
-        }}
-      >
-        <motion.button
-          onClick={() => setSoundOn((s) => !s)}
-          aria-pressed={soundOn}
-          whileTap={{ scale: 0.9 }}
-          style={{
-            position: "absolute",
-            top: 22,
-            right: 20,
-            zIndex: 5,
-            width: 44,
-            height: 44,
-            borderRadius: 999,
-            background: "rgba(255,255,255,.75)",
-            border: `2px solid ${colors.pink300}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: colors.cherry500,
-            boxShadow: "0 6px 14px rgba(232,83,107,.2)",
-            cursor: "pointer",
-          }}
-        >
-          <SpeakerIcon muted={!soundOn} />
-        </motion.button>
-
-        {/* Hero Branding */}
-        <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-
-          <div style={{ animation: reduced ? undefined : "wiggle 4s ease-in-out infinite", marginTop: 4 }}>
-            <BowIcon size={52} color={colors.cherry500} />
-          </div>
-          <h1
-            style={{
-              margin: "4px 0 0",
-              fontFamily: fonts.display,
-              fontWeight: 800,
-              fontSize: "clamp(38px, 11vw, 64px)",
-              lineHeight: 1.1,
-              color: colors.cherry500,
-              WebkitTextStroke: "6px #fff",
-              paintOrder: "stroke fill",
-              textShadow: "0 8px 0 rgba(232,83,107,.18)",
-              textAlign: "center",
-              maxWidth: "92%",
-            }}
-          >
-            Our Chapter
-          </h1>
-          <p style={{ margin: "6px 0 0", fontFamily: fonts.body, fontWeight: 800, fontSize: 16, color: colors.inkPlum, maxWidth: "90%" }}>
-            Started December 9, 2023
-          </p>
-
-          <span
-            style={{
-              display: "inline-block",
-              marginTop: 4,
-              background: "#fff",
-              border: `2px dashed ${colors.babyBlue200}`,
-              borderRadius: 12,
-              padding: "6px 14px",
-              fontFamily: fonts.body,
-              fontWeight: 800,
-              fontSize: 12,
-              letterSpacing: ".8px",
-              color: colors.cherry500,
-              transform: "rotate(-5deg)",
-              boxShadow: "0 4px 12px rgba(232,83,107,.15)",
-            }}
-          >
-            SINCE 12 . 09 . 2023
-          </span>
-        </div>
-
-        {/* Floating Polaroid Image Frame Showcase */}
-        <div
-          style={{
-            position: "relative",
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 16,
-            margin: "8px 0",
-          }}
-        >
-          <motion.div
-            animate={reduced ? { rotate: -6 } : { rotate: [-6, -4, -6] }}
-            transition={reduced ? STATIC : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              width: 130,
-              height: 155,
-              background: "#fff",
-              borderRadius: 16,
-              padding: "10px 10px 24px",
-              boxShadow: "0 10px 25px rgba(232,83,107,0.22)",
-              border: `2px solid ${colors.pink300}`,
-            }}
-          >
-            <img
-              src={sampleCover1}
-              alt="Chapter 1 Preview"
-              style={{ width: "100%", height: 110, borderRadius: 10, objectFit: "cover" }}
-            />
-            <div style={{ fontFamily: fonts.body, fontSize: 10, fontWeight: 800, color: colors.cherry500, marginTop: 4 }}>
-              Chapter 1
-            </div>
-          </motion.div>
-
-          <motion.div
-            animate={reduced ? { rotate: 5 } : { rotate: [5, 7, 5] }}
-            transition={reduced ? STATIC : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              width: 130,
-              height: 155,
-              background: "#fff",
-              borderRadius: 16,
-              padding: "10px 10px 24px",
-              boxShadow: "0 10px 25px rgba(232,83,107,0.22)",
-              border: `2px solid ${colors.pink300}`,
-            }}
-          >
-            <img
-              src={sampleCover2}
-              alt="Chapter 3 Preview"
-              style={{ width: "100%", height: 110, borderRadius: 10, objectFit: "cover" }}
-            />
-            <div style={{ fontFamily: fonts.body, fontSize: 10, fontWeight: 800, color: colors.cherry500, marginTop: 4 }}>
-              Chapter 3
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Start Button */}
-        <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-          <motion.button
-            onClick={handleStart}
-            animate={pressed || reduced ? {} : { scale: [1, 1.02, 1] }}
-            transition={
-              pressed || reduced ? { duration: 0.5 } : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
-            }
-            whileTap={{ scale: 0.93 }}
-            style={{
-              fontFamily: fonts.display,
-              fontWeight: 800,
-              fontSize: 21,
-              color: colors.cherry500,
-              background: "#ffffff",
-              border: `3px solid ${colors.cherry500}`,
-              borderRadius: 999,
-              padding: "16px 44px",
-              cursor: "pointer",
-              boxShadow: pressed ? "0 2px 0 #E8536B, 0 4px 10px rgba(232,83,107,.25)" : "0 5px 0 #E8536B, 0 10px 22px rgba(232,83,107,.28)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <RibbonIcon size={20} color={colors.cherry500} />
-              <span>Start Reading&nbsp;→</span>
-              <RibbonIcon size={20} color={colors.cherry500} />
-            </div>
-          </motion.button>
-          <span style={{ fontFamily: fonts.body, fontSize: 13, fontWeight: 700, color: colors.plumLight }}>
-            5 Chapters • Our Story So Far
-          </span>
-        </div>
-
-
-      </section>
-    </div>
+    <figure className="m-0 flex w-[118px] flex-col gap-2 sm:w-[132px]">
+      <div className="aspect-[4/5] overflow-hidden rounded-sm border border-line bg-sunken">
+        <img
+          src={getCloudinaryUrl(publicId, { width: 320, height: 400 })}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
+      </div>
+      <figcaption className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+        {label}
+      </figcaption>
+    </figure>
   );
 }
 
+export function CoverPage() {
+  const { enter } = useMotionPrefs();
+  const monthsary = useMonthsary();
+  usePlaceholderRefresh();
+
+  const [first, , third] = chapterSummaries;
+
+  return (
+    <Shell>
+      {/* The collage video is the masthead image, not a backdrop for the whole
+          site — it only loads here. It fades into paper so the type below sits
+          on a readable base instead of on an arbitrary video frame. */}
+      <div className="relative h-[38dvh] min-h-[240px] w-full overflow-hidden">
+        <BackdropVideo />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-30% via-surface/50 via-75% to-surface" />
+      </div>
+
+      <main className="relative mx-auto -mt-6 flex max-w-list flex-col items-center px-6 pb-[max(3rem,var(--safe-b))] text-center">
+        <motion.div {...enter} variants={listContainer} className="flex flex-col items-center">
+          <motion.span variants={fadeUp} className="mb-7 block h-px w-12 bg-line" aria-hidden="true" />
+
+          <motion.h1
+            variants={fadeUp}
+            className="m-0 font-display text-step4 font-light leading-[0.95] tracking-tight text-ink"
+          >
+            <span className="italic">Our</span> Chapter
+          </motion.h1>
+
+          <motion.p
+            variants={fadeUp}
+            className="mt-5 font-mono text-[11px] uppercase tracking-[0.22em] text-ink-faint"
+          >
+            Since 12.09.2023
+          </motion.p>
+
+          {/* The monthsary reading — the one thing on this page that changes. */}
+          <motion.div variants={fadeUp} className="mt-3">
+            {monthsary.isToday ? (
+              <p className="font-display text-step1 font-normal italic text-accent">
+                Happy {ordinal(monthsary.months)} monthsary.
+              </p>
+            ) : (
+              <p className="font-mono text-[11px] uppercase leading-relaxed tracking-[0.16em] text-ink-muted">
+                {monthsary.months} months · {monthsary.daysSince}{" "}
+                {monthsary.daysSince === 1 ? "day" : "days"}
+                <br />
+                <span className="text-ink-faint">
+                  next in {monthsary.daysUntil} {monthsary.daysUntil === 1 ? "day" : "days"}
+                </span>
+              </p>
+            )}
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="mt-9 flex items-start justify-center gap-4">
+            <Plate publicId={first.coverImagePublicId} label={`Chapter 0${first.number}`} />
+            <Plate publicId={third.coverImagePublicId} label={`Chapter 0${third.number}`} />
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="mt-10 flex flex-col items-center gap-5">
+            <CtaButton to={`/chapters/${first.slug}`}>Start reading</CtaButton>
+
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+              {chapterSummaries.length} chapters · our story so far
+            </span>
+
+            {/* The CTA jumps straight into chapter one, so without this the
+                directory is only reachable by backing out of a chapter. */}
+            <CtaButton to="/chapters" variant="quiet">
+              All chapters →
+            </CtaButton>
+          </motion.div>
+        </motion.div>
+      </main>
+    </Shell>
+  );
+}

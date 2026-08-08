@@ -12,11 +12,12 @@ function prefersLessData(): boolean {
 }
 
 /**
- * The full-bleed collage video behind the cover.
+ * The collage video that heads the cover page. Fills its nearest positioned
+ * ancestor, so the caller decides how tall the band is.
  *
- * It's 6.4 MB, so it is deliberately *not* mounted on the chapter list or the
- * reader — those are long-scroll pages where it is least visible, keeps
- * decoding while you scroll, and would delay first paint over cellular.
+ * It's 6.4 MB, so it is deliberately mounted on the cover only — the chapter
+ * list and reader are long-scroll pages where it was least visible, kept
+ * decoding while you scrolled, and delayed first paint over cellular.
  *
  * Falls back to the poster still for reduced-motion and data-saver users, who
  * then download no video bytes at all.
@@ -26,7 +27,7 @@ export function BackdropVideo() {
   const still = reduced || prefersLessData();
 
   return (
-    <div aria-hidden="true" className="fixed inset-0 -z-10 overflow-hidden bg-sunken">
+    <div aria-hidden="true" className="absolute inset-0 overflow-hidden bg-sunken">
       {still ? (
         <div
           className="absolute inset-0 bg-cover bg-center"
