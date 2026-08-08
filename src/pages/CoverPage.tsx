@@ -86,22 +86,7 @@ export function CoverPage() {
 
         {/* Hero Branding */}
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-          <span
-            style={{
-              background: colors.babyBlue200,
-              color: colors.inkPlum,
-              padding: "6px 18px",
-              borderRadius: 999,
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: "1.4px",
-              textTransform: "uppercase",
-              fontFamily: fonts.body,
-              boxShadow: "0 4px 12px rgba(190,231,247,0.5)",
-            }}
-          >
-            ✦ A Love Webtoon ✦
-          </span>
+
           <div style={{ animation: "wiggle 4s ease-in-out infinite", marginTop: 4 }}>
             <BowIcon size={52} color={colors.cherry500} />
           </div>
@@ -237,9 +222,7 @@ export function CoverPage() {
           </span>
         </div>
 
-        <svg viewBox="0 0 200 20" preserveAspectRatio="none" style={{ position: "relative", display: "block", width: "100%", height: 28, marginTop: 8 }} fill="#ffffff">
-          <path d="M0,20 Q10,0 20,20 Q30,0 40,20 Q50,0 60,20 Q70,0 80,20 Q90,0 100,20 Q110,0 120,20 Q130,0 140,20 Q150,0 160,20 Q170,0 180,20 Q190,0 200,20 Z" />
-        </svg>
+
       </section>
     </div>
   );
