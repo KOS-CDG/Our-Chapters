@@ -1,13 +1,25 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { CoverPage } from "./pages/CoverPage";
 import { ChapterListPage } from "./pages/ChapterListPage";
 import { ChapterReaderPage } from "./pages/ChapterReaderPage";
 import { PlaceholderToggle } from "./components/PlaceholderToggle";
 import { PenguinWidget } from "./components/PenguinWidget";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div style={{ position: "relative", zIndex: 0 }}>
         <Routes>
           <Route path="/" element={<CoverPage />} />

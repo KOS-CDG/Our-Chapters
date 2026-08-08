@@ -32,47 +32,43 @@ export function ChapterCard({ chapter, isNewest = false, to }: ChapterCardProps)
   const number = String(chapter.number).padStart(2, "0");
 
   return (
-    <MotionLink whileTap={tap} to={to} className="group flex items-center gap-4 py-5 sm:gap-5">
-        <span className="w-6 flex-none self-start pt-1 font-mono text-meta text-ink-faint tabular-nums">
-          {number}
-        </span>
+    <MotionLink whileTap={tap} to={to} className="group flex items-center gap-4 py-4 sm:gap-5">
+      <span className="w-6 flex-none font-mono text-meta text-ink-faint tabular-nums">
+        {number}
+      </span>
 
-        <div className="h-[90px] w-[72px] flex-none overflow-hidden rounded-sm bg-sunken">
-          <CoverThumb
-            publicId={chapter.coverImagePublicId}
-            mediaType={chapter.coverMediaType}
-            width={200}
-            height={250}
-            className="h-full w-full object-cover transition-transform duration-slow ease-soft group-hover:scale-[1.03]"
-          />
+      <div className="h-[72px] w-[58px] flex-none overflow-hidden rounded-sm bg-sunken">
+        <CoverThumb
+          publicId={chapter.coverImagePublicId}
+          mediaType={chapter.coverMediaType}
+          width={200}
+          height={250}
+          className="h-full w-full object-cover transition-transform duration-slow ease-soft group-hover:scale-[1.03]"
+        />
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
+          <span>Chapter {number}</span>
+          {isNewest && (
+            <span className="flex items-center gap-1.5 text-accent">
+              <span className="h-1 w-1 rounded-full bg-accent" aria-hidden="true" />
+              New
+            </span>
+          )}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
-            <span>{chapter.publishedAt}</span>
-            {isNewest && (
-              <span className="flex items-center gap-1.5 text-accent">
-                <span className="h-1 w-1 rounded-full bg-accent" aria-hidden="true" />
-                New
-              </span>
-            )}
-          </div>
-
-          <span className="truncate font-display text-step1 font-normal text-ink transition-colors duration-base ease-soft group-hover:text-accent">
-            {chapter.title}
-          </span>
-
-          <span className="line-clamp-2 font-body text-meta leading-relaxed text-ink-muted">
-            {chapter.teaser}
-          </span>
-        </div>
-
-        <span
-          className="flex-none rotate-180 text-ink-faint transition-all duration-base ease-soft group-hover:translate-x-0.5 group-hover:text-accent"
-          aria-hidden="true"
-        >
-          <ChevronLeftIcon size={16} />
+        <span className="truncate font-display text-step1 font-normal text-ink transition-colors duration-base ease-soft group-hover:text-accent">
+          {chapter.title}
         </span>
+      </div>
+
+      <span
+        className="flex-none rotate-180 text-ink-faint transition-all duration-base ease-soft group-hover:translate-x-0.5 group-hover:text-accent"
+        aria-hidden="true"
+      >
+        <ChevronLeftIcon size={16} />
+      </span>
     </MotionLink>
   );
 }
