@@ -1,22 +1,27 @@
-import { colors } from "../lib/tokens";
-
-const shimmerStyle = {
-  background: `linear-gradient(90deg, ${colors.pink50} 25%, ${colors.pink100} 37%, ${colors.pink50} 63%)`,
-  backgroundSize: "400px 100%",
-  animation: "shimmer 1.4s ease-in-out infinite",
-  borderRadius: 6,
-};
-
-/** Loading placeholder for a ChapterCard row. */
+/** Loading placeholder for one chapter index row. */
 export function ChapterCardSkeleton() {
   return (
-    <div style={{ display: "flex", gap: 14, alignItems: "center", background: "#fff", borderRadius: 24, padding: 14, boxShadow: "0 8px 20px rgba(232,83,107,.1)", border: "1.5px solid rgba(255,159,192,.25)" }}>
-      <div style={{ ...shimmerStyle, width: 72, height: 72, borderRadius: 18, flex: "none" }} />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
-        <div style={{ ...shimmerStyle, width: "60%", height: 12 }} />
-        <div style={{ ...shimmerStyle, width: "85%", height: 16 }} />
-        <div style={{ ...shimmerStyle, width: "70%", height: 12 }} />
+    <div className="flex animate-pulse items-center gap-4 py-5 sm:gap-5" aria-hidden="true">
+      <span className="w-6 flex-none self-start pt-1">
+        <span className="block h-3 w-5 rounded-sm bg-sunken" />
+      </span>
+      <div className="h-[90px] w-[72px] flex-none rounded-sm bg-sunken" />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="h-2.5 w-2/5 rounded-sm bg-sunken" />
+        <div className="h-4 w-4/5 rounded-sm bg-sunken" />
+        <div className="h-2.5 w-3/5 rounded-sm bg-sunken" />
       </div>
+    </div>
+  );
+}
+
+/** Wrapper that gives the skeleton rows an accessible loading announcement. */
+export function ChapterListSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div role="status" aria-label="Loading chapters" className="divide-y divide-line">
+      {Array.from({ length: count }).map((_, i) => (
+        <ChapterCardSkeleton key={i} />
+      ))}
     </div>
   );
 }
@@ -24,12 +29,11 @@ export function ChapterCardSkeleton() {
 /** Shown when the chapters list resolves empty. */
 export function EmptyState() {
   return (
-    <div style={{ marginTop: 48, textAlign: "center", background: "#fff", border: `2px dashed ${colors.pink300}`, borderRadius: 28, padding: "44px 28px", boxShadow: "0 8px 20px rgba(232,83,107,.1)" }}>
-      <svg viewBox="0 0 64 40" width={88} height={55} style={{ margin: "0 auto 14px", display: "block" }}>
-        <path d="M16 30c-8 0-14-5.5-14-12S8 6 16 6c1.6-4 6-6 12-6s10.4 2 12 6c8 0 14 5.5 14 12s-6 12-14 12H16z" fill={colors.babyBlue200} />
-      </svg>
-      <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 20, color: colors.cherry500, marginBottom: 6 }}>No chapters yet</div>
-      <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 14, color: colors.plumLight }}>check back soon!</div>
+    <div className="mt-16 border-y border-line py-16 text-center">
+      <p className="font-display text-step2 font-normal text-ink">No chapters yet</p>
+      <p className="mt-2 font-mono text-meta uppercase tracking-[0.14em] text-ink-faint">
+        Check back soon
+      </p>
     </div>
   );
 }

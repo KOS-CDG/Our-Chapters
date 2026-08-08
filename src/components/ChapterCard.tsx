@@ -1,110 +1,78 @@
 import { motion } from "framer-motion";
-import { colors, fonts } from "../lib/tokens";
+import { Link } from "react-router-dom";
 import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
+import { useMotionPrefs } from "../lib/motion";
 import { getCloudinaryUrl } from "../lib/cloudinary";
-import { BowIcon, ChevronLeftIcon } from "./icons";
+import { ChevronLeftIcon } from "./icons";
 import type { ChapterSummary } from "../types/chapter";
 
 export interface ChapterCardProps {
   chapter: ChapterSummary;
   isNewest?: boolean;
-  onSelect?: () => void;
+  to: string;
 }
 
-export function ChapterCard({ chapter, isNewest = false, onSelect }: ChapterCardProps) {
+/**
+ * One line in the chapter index.
+ *
+ * Deliberately not a card: no panel, no radius, no shadow. Rows separated by a
+ * single hairline read as a printed contents page, which is the whole point of
+ * the redesign — and it lets the photographs be the only colour on screen.
+ *
+ * A real Link rather than a clickable div, so it is focusable, announced as a
+ * link, and openable in a new tab without any role/onKeyDown scaffolding.
+ */
+export function ChapterCard({ chapter, isNewest = false, to }: ChapterCardProps) {
   usePlaceholderRefresh();
+  const { tap } = useMotionPrefs();
 
-  const thumbnailUrl = getCloudinaryUrl(chapter.coverImagePublicId, { width: 160, height: 160 });
+  const thumbnailUrl = getCloudinaryUrl(chapter.coverImagePublicId, { width: 200, height: 250 });
+  const number = String(chapter.number).padStart(2, "0");
 
   return (
-    <motion.div
-      onClick={onSelect}
-      whileHover={{ y: -4, boxShadow: "0 12px 28px rgba(232,83,107,.24)" }}
-      whileTap={{ scale: 0.97 }}
-      style={{
-        position: "relative",
-        display: "flex",
-        gap: 16,
-        alignItems: "center",
-        background: colors.white,
-        borderRadius: 24,
-        padding: 16,
-        boxShadow: "0 8px 22px rgba(232,83,107,.14)",
-        border: `2px solid ${colors.pink100}`,
-        cursor: "pointer",
-        transition: "border-color 0.2s ease",
-      }}
-    >
-      {isNewest && (
-        <div
-          style={{
-            position: "absolute",
-            top: -12,
-            right: 14,
-            zIndex: 3,
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            background: colors.cherry500,
-            color: "#fff",
-            padding: "5px 12px 5px 10px",
-            borderRadius: 999,
-            fontFamily: fonts.body,
-            fontWeight: 800,
-            fontSize: 11,
-            letterSpacing: ".6px",
-            transform: "rotate(-5deg)",
-            boxShadow: "0 4px 12px rgba(232,83,107,.35)",
-          }}
+    <motion.div whileTap={tap}>
+      <Link to={to} className="group flex items-center gap-4 py-5 sm:gap-5">
+        <span className="w-6 flex-none self-start pt-1 font-mono text-meta text-ink-faint tabular-nums">
+          {number}
+        </span>
+
+        <div className="h-[90px] w-[72px] flex-none overflow-hidden rounded-sm bg-sunken">
+          <img
+            src={thumbnailUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover transition-transform duration-slow ease-soft group-hover:scale-[1.03]"
+          />
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
+            <span>{chapter.publishedAt}</span>
+            {isNewest && (
+              <span className="flex items-center gap-1.5 text-accent">
+                <span className="h-1 w-1 rounded-full bg-accent" aria-hidden="true" />
+                New
+              </span>
+            )}
+          </div>
+
+          <span className="truncate font-display text-step1 font-normal text-ink transition-colors duration-base ease-soft group-hover:text-accent">
+            {chapter.title}
+          </span>
+
+          <span className="line-clamp-2 font-body text-meta leading-relaxed text-ink-muted">
+            {chapter.teaser}
+          </span>
+        </div>
+
+        <span
+          className="flex-none rotate-180 text-ink-faint transition-all duration-base ease-soft group-hover:translate-x-0.5 group-hover:text-accent"
+          aria-hidden="true"
         >
-          <BowIcon size={14} color="#fff" />
-          LATEST
-        </div>
-      )}
-
-      {/* Frame Thumbnail Container */}
-      <div
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: 20,
-          flex: "none",
-          overflow: "hidden",
-          border: `2px solid ${colors.pink300}`,
-          background: "#FAFAFC",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-        }}
-      >
-        <img
-          src={thumbnailUrl}
-          alt={chapter.title}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </div>
-
-      {/* Details */}
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontFamily: fonts.body, fontWeight: 800, fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: colors.cherry500 }}>
-            Chapter {chapter.number}
-          </span>
-          <span style={{ fontSize: 11, color: colors.pink300 }}>•</span>
-          <span style={{ fontFamily: fonts.body, fontWeight: 700, fontSize: 11, color: colors.plumLight }}>
-            {chapter.publishedAt}
-          </span>
-        </div>
-        <span style={{ fontFamily: fonts.display, fontWeight: 800, fontSize: 18, color: colors.inkPlum, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {chapter.title}
+          <ChevronLeftIcon size={16} />
         </span>
-        <span style={{ fontFamily: fonts.body, fontSize: 13, fontWeight: 600, color: colors.plumLight, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {chapter.teaser}
-        </span>
-      </div>
-
-      <span style={{ transform: "rotate(180deg)", flex: "none" }}>
-        <ChevronLeftIcon size={18} color={colors.cherry500} />
-      </span>
+      </Link>
     </motion.div>
   );
 }
-
