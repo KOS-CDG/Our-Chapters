@@ -299,68 +299,29 @@ export function PenguinWidget() {
         )}
       </AnimatePresence>
 
-      {/* Penguin toggle button */}
+      {/* Penguin toggle button — just Haru, no container */}
       <motion.button
         onClick={() => setOpen((o) => !o)}
-        whileTap={{ scale: 0.9 }}
-        animate={{ x: open ? -8 : 0 }}
+        whileTap={{ scale: 0.88 }}
+        animate={{ x: open ? -4 : 8 }}
         style={{
           position: "fixed",
-          bottom: 80,
+          bottom: 72,
           right: 0,
           zIndex: 50,
           background: "transparent",
           border: "none",
           cursor: "pointer",
           padding: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: 0,
-          filter: "drop-shadow(0 4px 8px rgba(232,83,107,.3))",
+          filter: "drop-shadow(0 6px 12px rgba(100,60,80,.35))",
         }}
         aria-label="Open design options"
       >
-        {/* Peek tab */}
-        <motion.div
-          animate={{ x: open ? 4 : 0 }}
-          style={{
-            background: t.accent,
-            borderRadius: "12px 0 0 12px",
-            padding: "6px 6px 6px 8px",
-            display: "flex",
-            alignItems: "center",
-            fontSize: 10,
-            fontFamily: fonts.body,
-            fontWeight: 800,
-            color: "#fff",
-            writingMode: "vertical-rl",
-            textOrientation: "mixed",
-            letterSpacing: "1px",
-          }}
-        >
-          {open ? "CLOSE" : "OPTIONS"}
-        </motion.div>
-
-        {/* Penguin image */}
-        <div style={{
-          width: 64,
-          height: 64,
-          borderRadius: "50% 0 0 50%",
-          background: "rgba(255,255,255,.92)",
-          border: `2px solid ${colors.pink300}`,
-          borderRight: "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          boxShadow: "-4px 4px 14px rgba(232,83,107,.2)",
-        }}>
-          <img
-            src="/Haru.webp"
-            alt="Haru the penguin"
-            style={{ width: 52, height: 52, objectFit: "contain" }}
-          />
-        </div>
+        <img
+          src="/Haru.webp"
+          alt="Haru the penguin"
+          style={{ width: 90, height: 90, objectFit: "contain", display: "block" }}
+        />
       </motion.button>
 
       {/* Slide-out panel */}
