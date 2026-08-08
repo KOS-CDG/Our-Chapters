@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { motion } from "framer-motion";
+
 
 /**
  * A handcrafted, pure-code pixelated lavender garden with animated swaying stems,
@@ -9,10 +9,10 @@ import { motion } from "framer-motion";
 export function PixelLavenderGarden() {
   // Generate random variation for pixel lavender stalks
   const stalks = useMemo(() => {
-    return Array.from({ length: 24 }).map((_, i) => ({
+    return Array.from({ length: 75 }).map((_, i) => ({
       id: i,
-      x: 12 + i * 16 + (i % 3) * 2,
-      height: 48 + (i % 5) * 8,
+      x: 4 + i * 16 + (i % 3) * 2,
+      height: 48 + ((i * 7) % 5) * 12,
       delay: (i % 7) * 0.4,
       duration: 3 + (i % 4) * 0.5,
       flowerShade: i % 3 === 0 ? "#8B5CF6" : i % 3 === 1 ? "#A78BFA" : "#C084FC",
@@ -27,7 +27,7 @@ export function PixelLavenderGarden() {
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {/* Soft purple watercolor wash */}
         <div
-          className="absolute left-1/2 bottom-0 h-48 w-[600px] -translate-x-1/2 rounded-full opacity-40 blur-[50px]"
+          className="absolute left-1/2 bottom-0 h-64 w-[800px] -translate-x-1/2 rounded-full opacity-40 blur-[60px]"
           style={{
             background:
               "radial-gradient(ellipse at center, rgba(167, 139, 250, 0.45) 0%, rgba(244, 114, 182, 0.25) 50%, transparent 80%)",
@@ -73,11 +73,13 @@ export function PixelLavenderGarden() {
       </div>
 
       {/* 2. PIXELATED CUTE LAVENDER GARDEN (Foreground Code Layer) */}
-      <div className="relative mx-auto flex max-w-list flex-col items-center px-4">
-        <div className="relative w-full h-36">
-          <svg
-            viewBox="0 0 400 90"
-            className="w-full h-full"
+      <div className="relative flex w-full flex-col items-center">
+        {/* Container uses a min-width to ensure the garden doesn't shrink to invisible on mobile, but overflow is hidden */}
+        <div className="relative w-full overflow-hidden flex justify-center pt-8">
+          <div className="relative w-full min-w-[800px] md:min-w-[1200px] xl:min-w-[1400px]">
+            <svg
+              viewBox="0 0 1200 120"
+              className="w-full h-auto drop-shadow-sm"
             preserveAspectRatio="xMidYMax meet"
             shapeRendering="crispEdges"
           >
@@ -171,14 +173,14 @@ export function PixelLavenderGarden() {
             </defs>
 
             {/* Earth / Grass Pixel Base Line */}
-            <rect x="0" y="86" width="400" height="4" fill="#423520" opacity="0.15" />
-            <rect x="0" y="84" width="400" height="2" fill="#5E8362" opacity="0.4" />
+            <rect x="0" y="116" width="1200" height="4" fill="#423520" opacity="0.15" />
+            <rect x="0" y="114" width="1200" height="2" fill="#5E8362" opacity="0.4" />
 
-            {/* Render 24 Pixel Lavender Stalks across the bottom */}
+            {/* Render 75 Pixel Lavender Stalks across the bottom */}
             {stalks.map((s) => (
               <g
                 key={s.id}
-                transform={`translate(${s.x}, ${88 - s.height})`}
+                transform={`translate(${s.x}, ${118 - s.height})`}
                 className={s.id % 2 === 0 ? "sway-slow" : "sway-fast"}
                 style={{ animationDelay: `${s.delay}s` }}
               >
@@ -201,30 +203,23 @@ export function PixelLavenderGarden() {
             ))}
 
             {/* Cute Pixel Bee 1 hovering over left garden */}
-            <use href="#pixel-bee" x="75" y="25" />
+            <use href="#pixel-bee" x="180" y="45" />
 
-            {/* Cute Pixel Bee 2 hovering over right garden */}
-            <use href="#pixel-bee" x="290" y="32" transform="scale(-1, 1) translate(-590, 0)" />
+            {/* Cute Pixel Bee 2 hovering over right garden (flipped) */}
+            <use href="#pixel-bee" transform="translate(1020, 55) scale(-1, 1)" />
 
-            {/* Cute Pixel Butterfly fluttering in center */}
-            <use href="#pixel-butterfly" x="185" y="18" />
+            {/* Cute Pixel Bee 3 hovering over middle-right garden */}
+            <use href="#pixel-bee" x="720" y="35" />
+
+            {/* Cute Pixel Butterfly fluttering in center-left */}
+            <use href="#pixel-butterfly" x="420" y="25" />
+            
+            {/* Cute Pixel Butterfly 2 fluttering in center-right (flipped) */}
+            <use href="#pixel-butterfly" transform="translate(850, 40) scale(-1, 1)" />
           </svg>
         </div>
-
-        {/* Caption Label matching site typography */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-2 inline-flex items-center gap-2 rounded-full border border-line bg-surface-raised px-4 py-1.5 shadow-soft"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--purple-soft))]" aria-hidden="true" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
-            Handcrafted Lavender Garden
-          </span>
-          <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--pink-blush))]" aria-hidden="true" />
-        </motion.div>
       </div>
+    </div>
     </div>
   );
 }
