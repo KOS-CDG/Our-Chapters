@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ---------- Persistent position ----------
+// ---------- Persistent helpers ----------
 function usePersist<T>(key: string, initial: T) {
   const stored = localStorage.getItem(key);
   const [val, setVal] = useState<T>(stored !== null ? JSON.parse(stored) : initial);
@@ -9,10 +9,23 @@ function usePersist<T>(key: string, initial: T) {
   return [val, save] as const;
 }
 
-// ---------- Constants ----------
-const SIZE    = 88;   // image size in px
-const PEEK_PX = 48;   // visible px when resting at edge
-const HIDDEN  = SIZE - PEEK_PX; // px pushed off-screen at rest
+// ---------- Image analysis results ----------
+// peekingharu.webp: portrait image (~810×1440 px), penguin occupies the RIGHT ~50%
+// of the canvas. Left half is empty white. Penguin faces left (toward screen).
+// We render only the right half using object-position so the penguin fills the slot.
+//
+// Haru.webp: square-ish image, centered penguin facing forward.
+
+const PEEK_IMG_W  = 110;  // rendered width of the full peekingharu image
+const PEEK_CROP_W = 58;   // width of the right-half crop we show (just the penguin)
+const PEEK_IMG_H  = 130;  // rendered height
+
+// How many px of the CROP stay visible when resting at edge
+// (penguin pokes just enough to be recognisable — head + eye + wing tip)
+const VISIBLE_AT_REST = 46;
+
+// Normal Haru size when open
+const HARU_SIZE = 88;
 
 // ---------- Main export ----------
 export function PenguinWidget() {
@@ -32,14 +45,7 @@ function HaruAssistiveTouch() {
   const dragRef    = useRef<{ startY: number; startX: number; initY: number } | null>(null);
   const hasDragged = useRef(false);
 
-  // Fully visible when hovered, active, or open
   const visible = hovered || open;
-
-  // X translation that hides most of Haru behind the edge
-  const translateX = visible ? 0 : (side === "right" ? HIDDEN : -HIDDEN);
-
-  // Mirror when on left side so Haru always faces inward
-  const flip: React.CSSProperties = side === "left" ? { transform: "scaleX(-1)" } : {};
 
   // ---- Pointer handlers ----
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -54,9 +60,8 @@ function HaruAssistiveTouch() {
     const dx = e.clientX - dragRef.current.startX;
     if (Math.abs(dy) > 5 || Math.abs(dx) > 5) hasDragged.current = true;
 
-    // Vertical slide — keep Haru within screen bounds
     const newY = Math.max(20, Math.min(
-      window.innerHeight - SIZE - 20,
+      window.innerHeight - PEEK_IMG_H - 20,
       dragRef.current.initY + dy,
     ));
     setPosY(newY);
@@ -71,78 +76,114 @@ function HaruAssistiveTouch() {
     dragRef.current = null;
   };
 
-  // Mobile: brief hover-out delay so user sees Haru before panel opens
   const onTouchStart = () => setHovered(true);
   const onTouchEnd   = () => setTimeout(() => { if (!open) setHovered(false); }, 500);
 
+  // ---- PEEKING state ----
+  // The peekingharu image has the penguin in the right half.
+  // We clip to PEEK_CROP_W wide and use object-position to show only the right portion.
+  // When resting: translate so only VISIBLE_AT_REST px stick out from the edge.
+  // When hovered: translate to show the full crop width.
+
+  // translateX for the PEEKING container
+  const peekHiddenOffset = PEEK_CROP_W - VISIBLE_AT_REST; // how many px to hide
+  const peekTranslateX   = visible
+    ? 0
+    : side === "right"
+      ?  peekHiddenOffset   // push rightward off screen
+      : -peekHiddenOffset;  // push leftward off screen
+
+  // Mirror the whole widget when on left side
+  const mirrorStyle: React.CSSProperties =
+    side === "left" ? { transform: "scaleX(-1)" } : {};
+
   return (
-    <motion.div
+    <div
       style={{
         position:    "fixed",
         top:         posY,
         [side]:      0,
         zIndex:      999,
-        width:       SIZE,
-        height:      SIZE,
         cursor:      "grab",
         userSelect:  "none",
         touchAction: "none",
       }}
-      animate={{
-        x:       translateX,
-        opacity: visible ? 1 : 0.65,
-      }}
-      transition={{ type: "spring", stiffness: 360, damping: 32 }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => { if (!open) setHovered(false); }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { if (!open) setHovered(false); }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       aria-label="Haru assistive touch"
     >
       <AnimatePresence mode="wait">
-        {open ? (
-          <motion.img
-            key="haru"
-            src="/Haru.webp"
-            alt="Haru"
-            draggable={false}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ type: "spring", stiffness: 380, damping: 26 }}
-            style={{
-              width: SIZE, height: SIZE,
-              objectFit: "contain",
-              display: "block",
-              pointerEvents: "none",
-              filter: "drop-shadow(0 6px 14px rgba(60,20,40,.4))",
-              ...flip,
-            }}
-          />
-        ) : (
-          <motion.img
+
+        {/* ---- PEEKING state ---- */}
+        {!open && (
+          <motion.div
             key="peek"
-            src="/peekingharu.webp"
-            alt="Haru peeking"
-            draggable={false}
+            initial={false}
+            animate={{
+              x:       peekTranslateX,
+              opacity: visible ? 1 : 0.75,
+            }}
+            exit={{ opacity: 0, scale: 0.88 }}
+            transition={{ type: "spring", stiffness: 380, damping: 34 }}
+            style={{
+              // Clip container to show ONLY the right (penguin) portion of the image
+              width:    PEEK_CROP_W,
+              height:   PEEK_IMG_H,
+              overflow: "hidden",
+              ...mirrorStyle,
+            }}
+          >
+            <img
+              src="/peekingharu.webp"
+              alt="Haru peeking"
+              draggable={false}
+              style={{
+                // Render the full image at PEEK_IMG_W wide so right crop is visible
+                width:       PEEK_IMG_W,
+                height:      PEEK_IMG_H,
+                objectFit:   "cover",
+                // Shift left so the penguin (right half) is centred in our crop window
+                marginLeft:  -(PEEK_IMG_W - PEEK_CROP_W),
+                display:     "block",
+                pointerEvents: "none",
+                filter:      "drop-shadow(-4px 4px 10px rgba(60,20,40,.35))",
+              }}
+            />
+          </motion.div>
+        )}
+
+        {/* ---- OPEN state: normal Haru ---- */}
+        {open && (
+          <motion.div
+            key="normal"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ type: "spring", stiffness: 380, damping: 26 }}
-            style={{
-              width: SIZE, height: SIZE,
-              objectFit: "contain",
-              display: "block",
-              pointerEvents: "none",
-              filter: "drop-shadow(0 4px 10px rgba(60,20,40,.3))",
-              ...flip,
-            }}
-          />
+            style={mirrorStyle}
+          >
+            <img
+              src="/Haru.webp"
+              alt="Haru"
+              draggable={false}
+              style={{
+                width:  HARU_SIZE,
+                height: HARU_SIZE,
+                objectFit: "contain",
+                display: "block",
+                pointerEvents: "none",
+                filter: "drop-shadow(0 6px 14px rgba(60,20,40,.4))",
+              }}
+            />
+          </motion.div>
         )}
+
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
