@@ -355,7 +355,11 @@ export function PenguinWidget() {
           overflow: "hidden",
           boxShadow: "-4px 4px 14px rgba(232,83,107,.2)",
         }}>
-          <PenguinSvg />
+          <img
+            src="/Haru.webp"
+            alt="Haru the penguin"
+            style={{ width: 52, height: 52, objectFit: "contain" }}
+          />
         </div>
       </motion.button>
 
@@ -385,7 +389,11 @@ export function PenguinWidget() {
           >
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-              <PenguinSvg size={40} />
+              <img
+                src="/Haru.webp"
+                alt="Haru the penguin"
+                style={{ width: 40, height: 40, objectFit: "contain" }}
+              />
               <div>
                 <div style={{ fontFamily: fonts.display, fontWeight: 800, fontSize: 17, color: t.accent }}>
                   Penguin Options
@@ -566,48 +574,3 @@ function RibbonRow({ color }: { color: string }) {
   );
 }
 
-/** Inline penguin SVG — matches the image the user provided */
-export function PenguinSvg({ size = 52 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 110"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Shadow */}
-      <ellipse cx="50" cy="104" rx="28" ry="5" fill="#ccc" opacity=".5" />
-      {/* Body */}
-      <ellipse cx="50" cy="68" rx="32" ry="38" fill="#555" />
-      {/* Belly */}
-      <ellipse cx="50" cy="75" rx="20" ry="26" fill="#fff" />
-      {/* Head */}
-      <ellipse cx="50" cy="32" rx="26" ry="27" fill="#555" />
-      {/* Face white */}
-      <ellipse cx="50" cy="35" rx="17" ry="18" fill="#fff" />
-      {/* Cheeks */}
-      <ellipse cx="37" cy="40" rx="6" ry="5" fill="#f9a8c4" opacity=".8" />
-      <ellipse cx="63" cy="40" rx="6" ry="5" fill="#f9a8c4" opacity=".8" />
-      {/* Eyes */}
-      <circle cx="43" cy="30" r="3" fill="#222" />
-      <circle cx="57" cy="30" r="3" fill="#222" />
-      <circle cx="44.2" cy="29" r="1" fill="#fff" />
-      <circle cx="58.2" cy="29" r="1" fill="#fff" />
-      {/* Beak */}
-      <ellipse cx="50" cy="38" rx="5" ry="3.5" fill="#555" />
-      <ellipse cx="50" cy="39" rx="4" ry="2" fill="#f97316" opacity=".9" />
-      {/* Wings */}
-      <ellipse cx="23" cy="68" rx="10" ry="16" fill="#444" transform="rotate(-15 23 68)" />
-      <ellipse cx="77" cy="68" rx="10" ry="16" fill="#444" transform="rotate(15 77 68)" />
-      {/* Feet */}
-      <ellipse cx="38" cy="100" rx="10" ry="6" fill="#f9a8c4" />
-      <ellipse cx="62" cy="100" rx="10" ry="6" fill="#f9a8c4" />
-      {/* Feet toes */}
-      <path d="M30 99 Q33 95 38 98" stroke="#e8788a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M38 98 Q43 95 46 99" stroke="#e8788a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M54 99 Q57 95 62 98" stroke="#e8788a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M62 98 Q67 95 70 99" stroke="#e8788a" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
