@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { colors, fonts } from "../lib/tokens";
 import { useMotionPrefs } from "../lib/motion";
+import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
 import { getCloudinaryUrl, getPanelSrcSet } from "../lib/cloudinary";
 import { StickerIcon, dropShadowStyle } from "./icons";
 import { LikeButton } from "./LikeButton";
@@ -42,17 +43,7 @@ export interface PanelProps {
 export function Panel({ panel, index }: PanelProps) {
   const { reveal } = useMotionPrefs();
   const [inspecting, setInspecting] = useState(false);
-  const [, setRerender] = useState(0);
-
-  useEffect(() => {
-    const handleUpdate = () => setRerender((r) => r + 1);
-    window.addEventListener("placeholder_mode_change", handleUpdate);
-    window.addEventListener("custom_photo_change", handleUpdate);
-    return () => {
-      window.removeEventListener("placeholder_mode_change", handleUpdate);
-      window.removeEventListener("custom_photo_change", handleUpdate);
-    };
-  }, []);
+  usePlaceholderRefresh();
 
   const handleClick = () => {
     if (DEV_TOOLS_ENABLED) setInspecting(true);

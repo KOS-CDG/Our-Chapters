@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../styles/animations.css";
 import { colors, fonts } from "../lib/tokens";
 import { STATIC, useMotionPrefs } from "../lib/motion";
+import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
 import { BowIcon, SpeakerIcon } from "../components/icons";
 import { getCloudinaryUrl } from "../lib/cloudinary";
 import { RibbonIcon } from "../components/RibbonIcon";
@@ -13,17 +14,7 @@ export function CoverPage() {
   const { reduced } = useMotionPrefs();
   const [soundOn, setSoundOn] = useState(false);
   const [pressed, setPressed] = useState(false);
-  const [, setRerender] = useState(0);
-
-  useEffect(() => {
-    const handleUpdate = () => setRerender((r) => r + 1);
-    window.addEventListener("placeholder_mode_change", handleUpdate);
-    window.addEventListener("custom_photo_change", handleUpdate);
-    return () => {
-      window.removeEventListener("placeholder_mode_change", handleUpdate);
-      window.removeEventListener("custom_photo_change", handleUpdate);
-    };
-  }, []);
+  usePlaceholderRefresh();
 
   const handleStart = () => {
     setPressed(true);

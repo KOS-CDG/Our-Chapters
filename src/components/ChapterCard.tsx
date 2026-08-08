@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { colors, fonts } from "../lib/tokens";
+import { usePlaceholderRefresh } from "../lib/usePlaceholderRefresh";
 import { getCloudinaryUrl } from "../lib/cloudinary";
 import { BowIcon, ChevronLeftIcon } from "./icons";
 import type { ChapterSummary } from "../types/chapter";
@@ -12,17 +12,7 @@ export interface ChapterCardProps {
 }
 
 export function ChapterCard({ chapter, isNewest = false, onSelect }: ChapterCardProps) {
-  const [, setRerender] = useState(0);
-
-  useEffect(() => {
-    const handleUpdate = () => setRerender((r) => r + 1);
-    window.addEventListener("placeholder_mode_change", handleUpdate);
-    window.addEventListener("custom_photo_change", handleUpdate);
-    return () => {
-      window.removeEventListener("placeholder_mode_change", handleUpdate);
-      window.removeEventListener("custom_photo_change", handleUpdate);
-    };
-  }, []);
+  usePlaceholderRefresh();
 
   const thumbnailUrl = getCloudinaryUrl(chapter.coverImagePublicId, { width: 160, height: 160 });
 
