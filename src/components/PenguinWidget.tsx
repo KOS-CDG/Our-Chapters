@@ -299,30 +299,8 @@ export function PenguinWidget() {
         )}
       </AnimatePresence>
 
-      {/* Penguin toggle button — just Haru, no container */}
-      <motion.button
-        onClick={() => setOpen((o) => !o)}
-        whileTap={{ scale: 0.88 }}
-        animate={{ x: open ? -4 : 8 }}
-        style={{
-          position: "fixed",
-          bottom: 72,
-          right: 0,
-          zIndex: 50,
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-          filter: "drop-shadow(0 6px 12px rgba(100,60,80,.35))",
-        }}
-        aria-label="Open design options"
-      >
-        <img
-          src="/Haru.webp"
-          alt="Haru the penguin"
-          style={{ width: 90, height: 90, objectFit: "contain", display: "block" }}
-        />
-      </motion.button>
+      {/* Draggable Haru — peeks at rest, shows full when open */}
+      <HaruDraggable open={open} onToggle={() => setOpen((o) => !o)} />
 
       {/* Slide-out panel */}
       <AnimatePresence>
@@ -535,3 +513,103 @@ function RibbonRow({ color }: { color: string }) {
   );
 }
 
+// ---------- Draggable Haru ----------
+function HaruDraggable({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  // Start position: bottom-right corner
+  const [pos, setPos] = useState({ x: window.innerWidth - 110, y: window.innerHeight - 160 });
+  const dragStart = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+  const hasDragged = useRef(false);
+  const SIZE = open ? 100 : 88;
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragStart.current = { px: e.clientX, py: e.clientY, ox: pos.x, oy: pos.y };
+    hasDragged.current = false;
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragStart.current) return;
+    const dx = e.clientX - dragStart.current.px;
+    const dy = e.clientY - dragStart.current.py;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) hasDragged.current = true;
+    const newX = Math.max(0, Math.min(window.innerWidth - SIZE, dragStart.current.ox + dx));
+    const newY = Math.max(0, Math.min(window.innerHeight - SIZE, dragStart.current.oy + dy));
+    setPos({ x: newX, y: newY });
+  };
+
+
+  const onPointerUpSnap = () => {
+    if (!hasDragged.current) { onToggle(); dragStart.current = null; return; }
+    dragStart.current = null;
+    // Snap to left or right edge
+    const mid = window.innerWidth / 2;
+    setPos((p) => ({
+      x: p.x + SIZE / 2 < mid ? 0 : window.innerWidth - SIZE,
+      y: Math.max(0, Math.min(window.innerHeight - SIZE, p.y)),
+    }));
+  };
+
+  const isPeeking = !open;
+
+  return (
+    <motion.div
+      style={{
+        position: "fixed",
+        left: pos.x,
+        top: pos.y,
+        zIndex: 50,
+        cursor: hasDragged.current ? "grabbing" : "grab",
+        userSelect: "none",
+        touchAction: "none",
+        filter: "drop-shadow(0 6px 14px rgba(80,40,60,.38))",
+      }}
+      animate={{ scale: open ? 1.08 : 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUpSnap}
+      aria-label={open ? "Close options" : "Open options — drag me around!"}
+    >
+      <AnimatePresence mode="wait">
+        {isPeeking ? (
+          <motion.img
+            key="peek"
+            src="/peekingharu.webp"
+            alt="Haru peeking"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.75 }}
+            transition={{ duration: 0.22 }}
+            style={{ width: SIZE, height: SIZE, objectFit: "contain", display: "block", pointerEvents: "none" }}
+          />
+        ) : (
+          <motion.img
+            key="normal"
+            src="/Haru.webp"
+            alt="Haru"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.75 }}
+            transition={{ duration: 0.22 }}
+            style={{ width: SIZE, height: SIZE, objectFit: "contain", display: "block", pointerEvents: "none" }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Subtle "drag me" ripple ring when idle */}
+      {isPeeking && (
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: -6,
+            borderRadius: "50%",
+            border: "2px solid rgba(232,83,107,.25)",
+            pointerEvents: "none",
+          }}
+          animate={{ scale: [1, 1.18, 1], opacity: [0.6, 0, 0.6] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
+    </motion.div>
+  );
+}
