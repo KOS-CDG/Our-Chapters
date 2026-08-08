@@ -40,7 +40,9 @@ export function CoverPage() {
         width: "100%",
         position: "relative",
         overflowX: "hidden",
-        background: "linear-gradient(180deg, #FFE7F0 0%, #FFD3E4 55%, #FFC2DA 100%)",
+        background: "linear-gradient(180deg, rgba(255, 231, 240, 0.7) 0%, rgba(255, 211, 228, 0.7) 55%, rgba(255, 194, 218, 0.7) 100%)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
         fontFamily: fonts.body,
       }}
     >
