@@ -18,8 +18,17 @@ export interface PanelSticker {
 
 export interface Panel {
   id: string;
-  /** e.g. "her-and-us/chapter-01/panel-03" — resolved via src/lib/cloudinary.ts */
+  /** e.g. "her-and-us/chapter-01/panel-03" — resolved via src/lib/cloudinary.ts.
+   *  For video panels, a local path like "/videos/ch1-panel-03.mp4" (Cloudinary
+   *  transforms don't apply to video, so this is used as-is). */
   cloudinaryPublicId: string;
+  /** "photo" when omitted. Video panels autoplay muted/looped like the cover
+   *  video, with the same caption/bubble overlays on top. */
+  mediaType?: "photo" | "video";
+  /** Poster frame shown before a video panel plays / while it loads, and used
+   *  in place of the video entirely for reduced-motion or data-saver users.
+   *  Required for mediaType "video". */
+  posterPublicId?: string;
   alt: string;
   caption?: string;
   /**

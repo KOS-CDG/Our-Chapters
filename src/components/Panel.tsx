@@ -8,6 +8,16 @@ import { LikeButton } from "./LikeButton";
 import { FrameInspectorModal } from "./FrameInspectorModal";
 import type { Panel as PanelData } from "../types/chapter";
 
+/** True when the browser reports a metered/slow connection. Non-standard API,
+ *  absent in Safari — absence means "no signal", so we let the video play.
+ *  Mirrors BackdropVideo's check so panel video and the cover video agree. */
+function prefersLessData(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (!conn) return false;
+  return conn.saveData === true || /(^|-)2g$/.test(conn.effectiveType ?? "");
+}
+
 // Dev-only: tap a panel to open the photo-swap tool while building the site.
 // Never shown in the production build a partner would open.
 const DEV_TOOLS_ENABLED = import.meta.env.DEV;
@@ -41,14 +51,19 @@ export interface PanelProps {
 }
 
 export function Panel({ panel, index }: PanelProps) {
-  const { reveal } = useMotionPrefs();
+  const { reveal, reduced } = useMotionPrefs();
   const [inspecting, setInspecting] = useState(false);
   usePlaceholderRefresh();
 
   const height = HEIGHT_BY_SIZE[panel.size];
   const isFullBleed = panel.size === "full";
+  const isVideo = panel.mediaType === "video";
+  const showStillInstead = isVideo && (reduced || prefersLessData());
   const imageUrl = getCloudinaryUrl(panel.cloudinaryPublicId, { width: 1080, height: 1200 });
   const srcSet = getPanelSrcSet(panel.cloudinaryPublicId, { height: 1200 });
+  const posterUrl = panel.posterPublicId
+    ? getCloudinaryUrl(panel.posterPublicId, { width: 1080, height: 1200 })
+    : undefined;
   const narrationAtBottom = panel.variant === "narration" ? index % 2 === 0 : false;
 
   return (
@@ -58,17 +73,33 @@ export function Panel({ panel, index }: PanelProps) {
         className="relative m-0 block w-full p-0 leading-[0]"
       >
         <div className="relative w-full overflow-hidden">
-          <img
-            src={imageUrl}
-            srcSet={srcSet}
-            sizes="100vw"
-            alt={panel.alt}
-            loading={index === 0 ? "eager" : "lazy"}
-            decoding="async"
-            fetchPriority={index === 0 ? "high" : undefined}
-            className="m-0 block w-full border-none object-cover p-0"
-            style={{ height }}
-          />
+          {isVideo && !showStillInstead ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload={index === 0 ? "auto" : "metadata"}
+              poster={posterUrl}
+              aria-label={panel.alt}
+              className="m-0 block w-full border-none object-cover p-0"
+              style={{ height }}
+            >
+              <source src={imageUrl} type="video/mp4" />
+            </video>
+          ) : (
+            <img
+              src={isVideo ? posterUrl ?? imageUrl : imageUrl}
+              srcSet={isVideo ? undefined : srcSet}
+              sizes={isVideo ? undefined : "100vw"}
+              alt={panel.alt}
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={index === 0 ? "high" : undefined}
+              className="m-0 block w-full border-none object-cover p-0"
+              style={{ height }}
+            />
+          )}
 
           {/* The story text. pointer-events:none so it never blocks the image,
               but never aria-hidden — this is the writing, not decoration. */}
@@ -141,9 +172,11 @@ export function Panel({ panel, index }: PanelProps) {
 
           <LikeButton panelId={panel.id} overlay />
 
-          {/* Dev-only photo swap. In production there is no click target at all,
-              so the panel never reads as interactive. */}
-          {DEV_TOOLS_ENABLED && (
+          {/* Dev-only photo swap — only wired up for photo panels; the swap tool
+              works with data-URL uploads, which isn't a fit for video files.
+              In production there is no click target at all either way, so the
+              panel never reads as interactive. */}
+          {DEV_TOOLS_ENABLED && !isVideo && (
             <button
               type="button"
               onClick={() => setInspecting(true)}
