@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { colors } from "../lib/tokens";
 import { useMotionPrefs } from "../lib/motion";
 
 // ---------- Persistent position ----------
@@ -74,13 +73,13 @@ function HaruAssistiveTouch() {
   const flip: React.CSSProperties = side === "left" ? { transform: "scaleX(-1)" } : {};
 
   // ---- Pointer handlers ----
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     dragRef.current = { startY: e.clientY, startX: e.clientX, initY: posY };
     hasDragged.current = false;
   };
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!dragRef.current) return;
     const dy = e.clientY - dragRef.current.startY;
     const dx = e.clientX - dragRef.current.startX;
@@ -102,9 +101,15 @@ function HaruAssistiveTouch() {
   };
 
   const onPointerUp = () => {
-    if (!hasDragged.current) setOpen((o) => !o);
     dragRef.current = null;
     setDragging(false);
+  };
+
+  // The toggle lives on click, not pointerup. Now that this is a real <button>,
+  // the browser fires its own click after pointerup — doing both would toggle
+  // twice. hasDragged still guards against a drag counting as a tap.
+  const onClick = () => {
+    if (!hasDragged.current) setOpen((o) => !o);
   };
 
   // Mobile: brief hover-out delay so user sees Haru before it settles back
@@ -114,7 +119,8 @@ function HaruAssistiveTouch() {
   const scale = dragging ? 1.1 : open ? 1.15 : 1;
 
   return (
-    <motion.div
+    <motion.button
+      type="button"
       style={{
         position:    "fixed",
         top:         posY,
@@ -122,6 +128,9 @@ function HaruAssistiveTouch() {
         zIndex:      999,
         width:       SIZE,
         height:      SIZE,
+        padding:     0,
+        border:      "none",
+        background:  "transparent",
         cursor:      dragging ? "grabbing" : "grab",
         userSelect:  "none",
         touchAction: "none",
@@ -131,11 +140,13 @@ function HaruAssistiveTouch() {
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onClick={onClick}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => { if (!open) setHovered(false); }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      aria-label="Haru assistive touch"
+      aria-label="Haru"
+      aria-expanded={open}
     >
       {/* The bubble "chrome" — a translucent circular button in the same
           style as the site's other floating controls,
@@ -149,9 +160,9 @@ function HaruAssistiveTouch() {
           height: SIZE,
           borderRadius: "50%",
           overflow: "hidden",
-          background: "rgba(255,255,255,.85)",
-          border: `2px solid ${colors.pink300}`,
-          boxShadow: "0 6px 16px rgba(232,83,107,.28)",
+          background: "rgb(var(--surface-raised) / .9)",
+          border: "1px solid rgb(var(--line))",
+          boxShadow: "var(--shadow-soft)",
         }}
       >
         {/* Both artworks stay mounted and cross-fade/scale against each
@@ -168,7 +179,8 @@ function HaruAssistiveTouch() {
         />
         <motion.img
           src="/Haru.webp"
-          alt="Haru"
+          alt=""
+          aria-hidden="true"
           draggable={false}
           animate={{ opacity: open ? 1 : 0, scale: open ? 1 : 1.12 }}
           transition={spring}
@@ -182,6 +194,6 @@ function HaruAssistiveTouch() {
           }}
         />
       </div>
-    </motion.div>
+    </motion.button>
   );
 }
