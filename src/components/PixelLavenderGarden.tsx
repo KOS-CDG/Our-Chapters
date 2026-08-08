@@ -225,7 +225,21 @@ export function PixelLavenderGarden() {
         />
       </div>
 
-      {/* 2. INTERACTIVE GARDEN CONTROLS PANEL */}
+      {/* 2. GARDEN TITLE HEADER */}
+      <div className="relative z-20 mb-3 flex flex-col items-center justify-center text-center px-4">
+        <h2 className="font-display text-step2 sm:text-step3 font-normal italic tracking-tight text-ink drop-shadow-xs">
+          Syvelle’s Lavender Garden
+        </h2>
+        <div className="mt-1 flex items-center gap-2">
+          <span className="h-px w-6 bg-accent/40" aria-hidden="true" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
+            ✦ Planted with love ✦
+          </span>
+          <span className="h-px w-6 bg-accent/40" aria-hidden="true" />
+        </div>
+      </div>
+
+      {/* 3. INTERACTIVE GARDEN CONTROLS PANEL */}
       <div className="relative z-20 mb-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 font-mono text-[11px] text-ink-muted">
         <div className="flex items-center gap-1 rounded-full border border-line bg-surface/90 backdrop-blur-md px-3 py-1 shadow-sm">
           <span className="text-ink-faint mr-1">Sky:</span>
